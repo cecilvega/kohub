@@ -1,0 +1,6 @@
+pandas
+polars
+plotly
+streamlit
+azure-storage-blob
+openpyxl
