@@ -6,15 +6,17 @@ from common import *
 st.set_page_config(page_title="Cross Chain Monitoring Tool", page_icon=":bar_chart:", layout="wide")
 
 styler()
-st.title("**Advanced Analytics - LATAM**")
+st.title("**Escondida MEL**")
 # st.title("Advanced Analytics")
 logo_path = Path("__file__").absolute().parent / "images/komatsu.png"
-dalle_path = Path("__file__").absolute().parent / "images/dalle.png"
+bhp_logo_path = Path("__file__").absolute().parent / "images/bhp-logo.png"
+dalle_path = Path("__file__").absolute().parent / "images/bhp-komatsu.png"
 from PIL import Image
 
 st.write(Path("__file__").absolute().parents[1])
-st.sidebar.image(Image.open(logo_path), caption="Sunrise by the mountains")
-st.image(Image.open(dalle_path).resize((600, 600)), caption="Sunrise by the mountains")
+st.sidebar.image(Image.open(logo_path), caption=".")
+st.sidebar.image(Image.open(bhp_logo_path), caption=".")
+st.image(Image.open(dalle_path).resize((800, 600)), caption="...")
 
 
 st.write(
@@ -23,7 +25,7 @@ st.write(
     """
 )
 
-st.subheader("Methodology")
+st.subheader("MEL")
 st.write(
     """
     

@@ -16,13 +16,13 @@ def plot_pool_timeline(df):
     # Create the Gantt chart
     fig = px.timeline(
         df,
-        x_start="repair_start_date",
-        x_end="repair_end_date",
+        x_start="cc_date",
+        x_end="arrival_date",
         y="pool_number",
-        color="pool_repair_type",
+        color="pool_type",
         color_discrete_map={"I": "red", "P": "green"},
         height=300,
-        title="Component Changeout Timeline",
+        title="Cambios Reales Ejecutados",
     )
 
     fig.update_layout(
@@ -85,7 +85,7 @@ def plot_pool_timeline(df):
     # Add equipment numbers over the bars
     for i, row in df.iterrows():
         fig.add_annotation(
-            x=row["repair_start_date"] + (row["repair_end_date"] - row["repair_start_date"]) / 2,
+            x=row["cc_date"] + (row["arrival_date"] - row["cc_date"]) / 2,
             y=row["pool_number"],
             text=str(row["equipo"]),
             showarrow=False,
@@ -100,8 +100,8 @@ def plot_pool_timeline(df):
         height=300,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title="Tipo de Cambio"),
     )
-    start_date = df["repair_start_date"].min()
-    end_date = df["repair_end_date"].max()
+    start_date = df["cc_date"].min()
+    end_date = df["cc_date"].max()
     # Add invisible trace to ensure xaxis2 spans the full range
     fig.add_trace(
         go.Scatter(
@@ -119,11 +119,19 @@ def plot_pool_timeline(df):
     fig.update_traces(marker_line_color="rgb(8,48,107)", marker_line_width=1.5, opacity=0.8)
     return fig
 
+componente = st.selectbox("Selección de Componente", options = ('Blower',
+                                                    'Cilindro Dirección',
+                                                    'Suspensión Trasera',
+                                                    'CMSD',
+                                                    'Motor Tracción',
+                                                    'Cilindro Levante',
+                                                    'Módulo Potencia'))
 
-st.selectbox("Selección de fecha", ("days_ago", "date_range", "usage"))
 
-st.dataframe(df)
-df = df.loc[df["component"] == "cms"].reset_index(drop=True)
+df = pd.read_csv("pool-consolidated.csv")
+df[["cc_date", "arrival_date"]] = df[["cc_date", "arrival_date"]].apply(lambda x: pd.to_datetime(x, format="%Y-%m-%d"))
+st.dataframe(df.head(3))
+df = df.loc[df["componente"] == componente].reset_index(drop=True)
 df = df.assign(pool_number=df["pool_number"].astype(str))
 fig = plot_pool_timeline(df)
 st.plotly_chart(fig, use_container_width=True)
