@@ -119,18 +119,24 @@ def plot_pool_timeline(df):
     fig.update_traces(marker_line_color="rgb(8,48,107)", marker_line_width=1.5, opacity=0.8)
     return fig
 
-componente = st.selectbox("Selección de Componente", options = ('Blower',
-                                                    'Cilindro Dirección',
-                                                    'Suspensión Trasera',
-                                                    'CMSD',
-                                                    'Motor Tracción',
-                                                    'Cilindro Levante',
-                                                    'Módulo Potencia'))
+
+componente = st.selectbox(
+    "Selección de Componente",
+    options=(
+        "Blower",
+        "Cilindro Dirección",
+        "Suspensión Trasera",
+        "CMSD",
+        "Motor Tracción",
+        "Cilindro Levante",
+        "Módulo Potencia",
+    ),
+)
 
 
 df = pd.read_csv("pool-consolidated.csv")
 df[["cc_date", "arrival_date"]] = df[["cc_date", "arrival_date"]].apply(lambda x: pd.to_datetime(x, format="%Y-%m-%d"))
-st.dataframe(df.head(3))
+# st.dataframe(df.head(3))
 df = df.loc[df["componente"] == componente].reset_index(drop=True)
 df = df.assign(pool_number=df["pool_number"].astype(str))
 fig = plot_pool_timeline(df)
