@@ -21,7 +21,7 @@ def plot_pool_timeline(df):
         y="pool_number",
         color="pool_type",
         color_discrete_map={"I": "red", "P": "green"},
-        height=300,
+        height=800,
         title="Cambios Reales Ejecutados",
     )
 
@@ -97,7 +97,7 @@ def plot_pool_timeline(df):
     # Update layout for cleanliness
     fig.update_layout(
         margin=dict(l=10, r=10, t=50, b=50),
-        height=300,
+        height=500,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title="Tipo de Cambio"),
     )
     start_date = df["cc_date"].min()

@@ -4,3 +4,4 @@ plotly
 streamlit
 azure-storage-blob
 openpyxl
+matplotlib
