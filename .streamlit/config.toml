@@ -1,7 +1,17 @@
 [theme]
 base = "light"
 
-primaryColor = "#140a9a"
+primaryColor = "#FF5519"  # BHP orange
+backgroundColor = "#FFFFFF"  # White
+secondaryBackgroundColor = "#F0F0F0"  # Light gray for contrast
+textColor = "#000000"  # Black for text
+
+
+#primaryColor = "#140a9a"
+
+[server]
+fileWatcherType = "poll"
+password = "derek"
 #backgroundColor = "#F0FF33"
 #secondaryBackgroundColor = "#3183D1"
 #textColor = "#03080C"
