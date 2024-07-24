@@ -68,7 +68,7 @@ from PIL import Image
 st.write(Path("__file__").absolute().parents[1])
 st.sidebar.image(Image.open(logo_path), caption="BHP Escondida")
 st.sidebar.image(Image.open(bhp_logo_path), caption=".")
-st.image(Image.open(dalle_path).resize((800, 600)), caption="BHP Escondida")
+# st.image(Image.open(dalle_path).resize((800, 600)), caption="BHP Escondida")
 
 
 st.subheader("MEL (Mine Equipment Lifecycle) Overview")
