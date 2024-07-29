@@ -7,9 +7,12 @@ import os
 import sys
 import plotly.express as px
 from plotly import graph_objects as go
+from azure.storage.blob import BlobServiceClient
+from io import BytesIO
 
 st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
 styler()
+set_secrets()
 
 
 def plot_pool_timeline(df):
@@ -139,7 +142,19 @@ componente = st.selectbox(
 )
 
 
-df = pd.read_csv("pool-consolidated.csv")
+blob_service_client = BlobServiceClient(
+    account_url=os.environ["AZURE_ACCOUNT_URL"],
+    credential=os.environ["AZURE_SAS_TOKEN"],
+)
+
+blob_client = blob_service_client.get_blob_client(
+    container=os.environ["AZURE_CONTAINER_NAME"],
+    blob=f"{os.environ['AZURE_PREFIX']}/pool-consolidated.csv",
+)
+blob_data = blob_client.download_blob()
+blob_data = BytesIO(blob_data.readall())
+df = pd.read_csv(blob_data)
+
 df[["cc_date", "arrival_date"]] = df[["cc_date", "arrival_date"]].apply(lambda x: pd.to_datetime(x, format="%Y-%m-%d"))
 
 df = df.loc[df["componente"] == componente].reset_index(drop=True)

@@ -4,6 +4,9 @@ from common import *
 
 
 st.set_page_config(page_title="BHP Escondida MEL", page_icon=":bar_chart:", layout="wide")
+styler()
+set_secrets()
+
 
 # Custom CSS to match BHP colors
 st.markdown(
@@ -27,7 +30,7 @@ st.markdown(
 
 st.title("**BHP Escondida MEL**")
 
-styler()
+
 st.title("**Escondida MEL**")
 # st.title("Advanced Analytics")
 logo_path = Path("__file__").absolute().parent / "images/komatsu.png"

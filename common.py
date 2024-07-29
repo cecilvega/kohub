@@ -1,3 +1,5 @@
+import os
+
 import sys
 from pathlib import Path
 
@@ -9,13 +11,18 @@ sys.path.insert(0, str(source_path / "dags"))
 import polars as pl
 from datetime import timedelta
 
-__all__ = [
-    "styler",
-    "theme_plotly",
-]
+__all__ = ["styler", "theme_plotly", "set_secrets"]
 
 theme_plotly = "streamlit"
 # [data-testid="stToolbar"] {visibility: hidden !important;}
+
+
+def set_secrets():
+    for key, value in st.secrets.items():
+        os.environ[key] = value
+
+
+#     st.secrets["db"] = "sqlite"
 
 
 def styler():
