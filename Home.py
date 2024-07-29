@@ -5,7 +5,6 @@ from common import *
 
 st.set_page_config(page_title="BHP Escondida MEL", page_icon=":bar_chart:", layout="wide")
 styler()
-set_secrets()
 
 
 # Custom CSS to match BHP colors

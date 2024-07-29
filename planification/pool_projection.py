@@ -12,7 +12,6 @@ from io import BytesIO
 
 st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
 styler()
-set_secrets()
 
 
 def plot_pool_timeline(df):

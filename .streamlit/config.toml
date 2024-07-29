@@ -9,9 +9,9 @@ textColor = "#000000"  # Black for text
 
 #primaryColor = "#140a9a"
 
-[server]
-fileWatcherType = "poll"
-password = "derek"
+#[server]
+#fileWatcherType = "poll"
+#password = "derek"
 #backgroundColor = "#F0FF33"
 #secondaryBackgroundColor = "#3183D1"
 #textColor = "#03080C"
