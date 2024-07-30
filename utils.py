@@ -3,10 +3,13 @@ import openpyxl
 import re
 from datetime import datetime
 from pathlib import Path
+import os
+from io import BytesIO
+from azure.storage.blob import BlobServiceClient
 
 
 # Function to get weeks and comments where value is 1
-def get_weeks_and_comments(row):
+def get_weeks_and_comments(row, sheet):
     weeks = []
     comments = []
     row_idx = int(row.name.strip("N°"))
@@ -20,9 +23,9 @@ def get_weeks_and_comments(row):
     return pd.Series({"weeks": weeks, "comments": comments})
 
 
-def get_end_week(row):
+def get_end_week(row, sheet):
     weeks = []
-    pool_repair_types = []
+    pool_changeout_types = []
     row_idx = int(row.name.strip("N°"))
     for col_idx in range(0, row.__len__()):
         if col_idx > 2:
@@ -36,96 +39,99 @@ def get_end_week(row):
             ):
                 weeks.append(list(row.keys())[col_idx - 2])
                 if prev_cell.fill.fgColor.rgb in ["FFEDBFBB", '"FFE88880"']:
-                    pool_repair_types.append("I")
+                    pool_changeout_types.append("I")
                 else:
-                    pool_repair_types.append("P")
+                    pool_changeout_types.append("P")
 
-    return pd.Series({"weeks": weeks, "pool_repair_type": pool_repair_types})
+    return pd.Series({"weeks": weeks, "pool_changeout_type": pool_changeout_types})
 
 
-def idx_to_pool_number(df):
+def idx_to_pool_slot(df):
     df = (
         df.reset_index()
-        .rename(columns={"index": "pool_number"})
-        .assign(pool_number=lambda x: x["pool_number"].str.strip("N°"))
+        .rename(columns={"index": "pool_slot"})
+        .assign(pool_slot=lambda x: x["pool_slot"].str.strip("N°"))
     )
     return df
 
 
-files = [p for p in Path("pool-files").rglob("*cms.xlsx")]
+# Function to extract information from comments
+def extract_info(comment):
+    equipo_match = re.search(r"Equipo:\s*(\d+)", comment)
+    ns_match = re.search(r"NS:\s*(#\w*-?\w*)", comment)
+
+    equipo = equipo_match.group(1) if equipo_match else None
+    ns = ns_match.group(1) if ns_match else None
+
+    return equipo, ns
 
 
-frames = []
-for file in files:
-
-    # Function to extract information from comments
-    def extract_info(comment):
-        equipo_match = re.search(r"Equipo:\s*(\d+)", comment)
-        ns_match = re.search(r"NS:\s*(#\w*-?\w*)", comment)
-
-        equipo = equipo_match.group(1) if equipo_match else None
-        ns = ns_match.group(1) if ns_match else None
-
-        return equipo, ns
-
-    # Read the Excel file
-    excel_file = file.__str__()  # Replace with your actual file name
-    wb = openpyxl.load_workbook(excel_file, data_only=True)
-    sheet = wb.active
-
-    # Create a DataFrame from the Excel data
-    data = []
-    for row in sheet.iter_rows(min_row=2, values_only=True):
-        data.append(row)
-
-    df = pd.DataFrame(data, columns=[cell.value for cell in sheet[1]])
-    df.set_index(df.columns[0], inplace=True)
-
-    # Process the dataframe
-    start_repair_df = (
-        df.apply(get_weeks_and_comments, axis=1)
-        .explode(["weeks", "comments"])
-        .rename(columns={"weeks": "repair_start_week"})
-        .pipe(idx_to_pool_number)
+def read_archived_pool_proj():
+    blob_service_client = BlobServiceClient(
+        account_url=os.environ["AZURE_ACCOUNT_URL"],
+        credential=os.environ["AZURE_SAS_TOKEN"],
     )
 
-    # Extract information from comments
-    start_repair_df[["equipo", "ns"]] = start_repair_df["comments"].apply(lambda x: pd.Series(extract_info(x)))
-    start_repair_df = start_repair_df.drop(columns=["comments"]).assign(
-        repair_start_date=start_repair_df["repair_start_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
+    container_client = blob_service_client.get_container_client(os.environ["AZURE_CONTAINER_NAME"])
+    blob_list = container_client.list_blobs(
+        name_starts_with=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/ARCHIVED_PLAN"
     )
-    end_repair_df = (
-        df.apply(get_end_week, axis=1)
-        .explode(["weeks", "pool_repair_type"])
-        .rename(columns={"weeks": "repair_end_week"})
-        .pipe(idx_to_pool_number)
-    )
-    end_repair_df = end_repair_df.assign(
-        repair_end_date=end_repair_df["repair_end_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
-    )
+    blob_list = [f.name for f in blob_list]
+    frames = []
+    for file in blob_list:
 
-    df = pd.merge_asof(
-        start_repair_df.sort_values("repair_start_date"),
-        end_repair_df.sort_values("repair_end_date"),
-        by="pool_number",
-        left_on="repair_start_date",
-        right_on="repair_end_date",
-        direction="forward",
-    ).assign(component=file.stem.split("-")[-1])
-    frames.append(df)
-df = pd.concat(frames)
+        # Read the Excel file
+        blob_client = blob_service_client.get_blob_client(
+            container=os.environ["AZURE_CONTAINER_NAME"],
+            blob=file,
+        )
+        blob_data = blob_client.download_blob()
+        blob_data = BytesIO(blob_data.readall())
+        wb = openpyxl.load_workbook(blob_data, data_only=True)
 
-# @st.cache_data(persist="disk")
-# def select_lr_partitions(date_filters=None, machine_filters=None):
-#     files = list_lr_files()
-#     df = pl.from_pandas(pd.DataFrame(files))
-#     if machine_filters is not None:
-#         df = df.filter(pl.col("machine_id").is_in(machine_filters))
-#     if date_filters is not None:
-#         df = (
-#             df.join(date_filters, how="inner", on="machine_id")
-#             .filter(pl.col("partition_date").is_between(lower_bound="from_datetime", upper_bound="to_datetime"))
-#             .drop(["from_datetime", "to_datetime"])
-#         )
-#     files = df.to_dicts()
-#     return files
+        sheet = wb.active
+
+        # Create a DataFrame from the Excel data
+        data = []
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            data.append(row)
+
+        df = pd.DataFrame(data, columns=[cell.value for cell in sheet[1]])
+        df.set_index(df.columns[0], inplace=True)
+
+        # Process the dataframe
+        changeouts_df = (
+            df.apply(lambda x: get_weeks_and_comments(x, sheet), axis=1)
+            .explode(["weeks", "comments"])
+            .rename(columns={"weeks": "changeout_week"})
+            .pipe(idx_to_pool_slot)
+        )
+
+        # Extract information from comments
+        changeouts_df[["equipo", "component_serial"]] = changeouts_df["comments"].apply(
+            lambda x: pd.Series(extract_info(x))
+        )
+        changeouts_df = changeouts_df.drop(columns=["comments"]).assign(
+            changeout_date=changeouts_df["changeout_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
+        )
+        arrivals_df = (
+            df.apply(lambda x: get_end_week(x, sheet), axis=1)
+            .explode(["weeks", "pool_changeout_type"])
+            .rename(columns={"weeks": "arrival_week"})
+            .pipe(idx_to_pool_slot)
+        )
+        arrivals_df = arrivals_df.assign(
+            arrival_date=arrivals_df["arrival_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
+        )
+
+        df = pd.merge_asof(
+            changeouts_df.sort_values("changeout_date"),
+            arrivals_df.sort_values("arrival_date"),
+            by="pool_slot",
+            left_on="changeout_date",
+            right_on="arrival_date",
+            direction="forward",
+        ).assign(component=file.split("-")[-1].split(".")[0])
+        frames.append(df)
+    df = pd.concat(frames)
+    return df
