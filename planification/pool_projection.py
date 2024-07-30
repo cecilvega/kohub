@@ -44,6 +44,7 @@ componente = st.selectbox(
         "Cilindro Levante",
         "Módulo Potencia",
     ),
+    index=4,
 )
 
 df = df.loc[df["componente"] == componente].reset_index(drop=True)
@@ -74,14 +75,14 @@ if not filtered_df.empty:
             # repair_color = "normal" if row["pool_type"] == "P" else "inverse"
 
             st.metric(
-                label=f"Pool {row['pool_slot']} - Equipment {row['equipo']}",
-                value=f"{days_until_arrival} days until arrival",
+                label=f"Equipo {row['equipo']}",
+                value=f"{days_until_arrival} para llegada",
                 # delta=f"{repair_days} days repair",
                 # delta_color=repair_color,
             )
-            st.write(f"Arrival Date: {row['arrival_date'].date()}")
-            st.write(f"Original Change Date: {row['changeout_date'].date()}")
-            st.write(f"Pool Type: {row['pool_changeout_type']}")
+            st.write(f"Fecha llegada: {row['arrival_date'].date()}")
+            st.write(f"Fecha cambio componente: {row['changeout_date'].date()}")
+            st.write(f"Tipo de cambio: {row['pool_changeout_type']}")
             st.write("---")
 else:
     st.write("No upcoming arrivals for the selected date.")
