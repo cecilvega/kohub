@@ -8,6 +8,18 @@ from io import BytesIO
 from azure.storage.blob import BlobServiceClient
 
 
+def data_fixes(df):
+    # Mal puesta la fecha de inicio de cambio de motor de tracción en el pool slot 6
+    df.loc[
+        (df["pool_slot"] == "6")
+        & (df["component_code"] == "mt")
+        & (df["equipo"] == "856")
+        & (df["component_serial"] == "#WX14020007T"),
+        "changeout_week",
+    ] = "2024-W21"
+    return df
+
+
 # Function to get weeks and comments where value is 1
 def get_weeks_and_comments(row, sheet):
     weeks = []
@@ -111,6 +123,7 @@ def read_archived_pool_proj():
         changeouts_df[["equipo", "component_serial"]] = changeouts_df["comments"].apply(
             lambda x: pd.Series(extract_info(x))
         )
+
         changeouts_df = changeouts_df.drop(columns=["comments"]).assign(
             changeout_date=changeouts_df["changeout_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
         )
@@ -131,7 +144,9 @@ def read_archived_pool_proj():
             left_on="changeout_date",
             right_on="arrival_date",
             direction="forward",
-        ).assign(component=file.split("-")[-1].split(".")[0])
+        ).assign(component_code=file.split("-")[-1].split(".")[0])
         frames.append(df)
+
     df = pd.concat(frames)
+    df = data_fixes(df)
     return df
