@@ -9,16 +9,36 @@ import plotly.express as px
 from plotly import graph_objects as go
 from azure.storage.blob import BlobServiceClient
 from io import BytesIO
+from planification.pool import *
+from datetime import datetime
 
 st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
 styler()
 
 
-df = read_archived_pool_proj()
+available_components = [
+    "bp",
+    # "cd",
+    "mt",
+    # "st", "cms", "cl", "mp"
+]
+cc_df = read_cc()
+cc_df = cc_df.loc[~((cc_df["component_code"] == "mt") & ~(cc_df["subcomponente"].str.contains("MOTOR TRACCIÓN")))]
+pool_proj_df = read_archived_pool_proj().drop(columns=["changeout_date"])
+cc_df = cc_df.loc[cc_df["component_code"].isin(available_components)].reset_index(drop=True)
+pool_proj_df = pool_proj_df.loc[pool_proj_df["component_code"].isin(available_components)].reset_index(drop=True)
+
+df = generate_pool_projection(cc_df, pool_proj_df)
+
+df[["changeout_date", "arrival_date"]] = df[["changeout_date", "arrival_date"]].apply(
+    lambda x: pd.to_datetime(x, format="%Y-%m-%d")
+)
+
+
 df = df.assign(
-    componente=df["component"].map(
+    componente=df["component_code"].map(
         lambda x: {
-            "bl": "Blower",
+            "bp": "Blower",
             "cd": "Cilindro Dirección",
             "st": "Suspensión Trasera",
             "cms": "CMSD",
@@ -28,11 +48,6 @@ df = df.assign(
         }[x]
     )
 )
-df[["changeout_date", "arrival_date"]] = df[["changeout_date", "arrival_date"]].apply(
-    lambda x: pd.to_datetime(x, format="%Y-%m-%d")
-)
-
-
 componente = st.selectbox(
     "Selección de Componente",
     options=(

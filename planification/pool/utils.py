@@ -5,10 +5,10 @@ import re
 # Function to extract information from comments
 def extract_info(comment):
     equipo_match = re.search(r"Equipo:\s*(\d+)", comment)
-    ns_match = re.search(r"NS:\s*(#\w*-?\w*)", comment)
-
-    equipo = equipo_match.group(1) if equipo_match else None
+    ns_match = re.search(r"NS:\s*(#+\w*-?\w*)", comment)
     ns = ns_match.group(1) if ns_match else None
+    ns = re.sub(r"^#+", "#", ns)
+    equipo = equipo_match.group(1) if equipo_match else None
 
     return equipo, ns
 

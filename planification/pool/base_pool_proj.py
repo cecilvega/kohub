@@ -6,6 +6,7 @@ from pathlib import Path
 import os
 from io import BytesIO
 from azure.storage.blob import BlobServiceClient
+from planification.pool.utils import extract_info, idx_to_pool_slot, get_weeks_and_comments, get_end_week
 
 
 def data_fixes(df):
@@ -17,6 +18,51 @@ def data_fixes(df):
         & (df["component_serial"] == "#WX14020007T"),
         "changeout_week",
     ] = "2024-W21"
+
+    mask = (df["pool_slot"] == "2") & (df["component_code"] == "bp") & (df["changeout_week"] == "2023-W50")
+    df.loc[mask, "equipo"] = "289"
+    df.loc[mask, "component_serial"] = "#EE13070558"
+
+    df.loc[
+        (df["pool_slot"] == "2")
+        & (df["component_code"] == "bp")
+        & (df["equipo"] == "864")
+        & (df["component_serial"] == "#EE14070950"),
+        "changeout_week",
+    ] = "2024-W19"
+
+    df.loc[
+        (df["pool_slot"] == "13")
+        & (df["component_code"] == "bp")
+        & (df["equipo"] == "851")
+        & (df["component_serial"] == "#EE10040299"),
+        "changeout_week",
+    ] = "2024-W19"
+
+    df.loc[
+        (df["pool_slot"] == "10")
+        & (df["component_code"] == "cd")
+        & (df["equipo"] == "858")
+        & (df["changeout_week"] == "2023-W34"),
+        "component_serial",
+    ] = "#73-LB36"
+
+    df.loc[
+        (df["pool_slot"] == "6")
+        & (df["component_code"] == "cd")
+        & (df["equipo"] == "870")
+        & (df["component_serial"] == "#EMWH340"),
+        "changeout_week",
+    ] = "2024-W7"
+
+    df.loc[
+        (df["pool_slot"] == "7")
+        & (df["component_code"] == "cd")
+        & (df["equipo"] == "870")
+        & (df["component_serial"] == "#EMYK00487"),
+        "changeout_week",
+    ] = "2024-W7"
+
     return df
 
 
