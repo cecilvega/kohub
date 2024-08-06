@@ -9,6 +9,71 @@ from azure.storage.blob import BlobServiceClient
 from planification.pool.utils import extract_info, idx_to_pool_slot, get_weeks_and_comments, get_end_week
 
 
+def get_weeks_and_comments(row, sheet):
+    weeks = []
+    comments = []
+    row_idx = int(row.name.strip("N°"))
+    col_idx = 1
+
+    for col, value in row.items():
+        # print(row_idx)
+        if value == 1:
+            weeks.append(col)
+            cell = sheet[row_idx][col_idx]
+            comments.append(cell.comment.text if cell.comment else "")
+        col_idx += 1
+    return pd.Series({"weeks": weeks, "comments": comments})
+
+
+def idx_to_pool_slot(df):
+    df = df.rename_axis("pool_slot").reset_index().assign(pool_slot=lambda x: x["pool_slot"].str.strip("N°"))
+    return df
+
+
+def extract_info(comment):
+    equipo_match = re.search(r"Equipo:\s*(\d+)", comment)
+    ns_match = re.search(r"NS:\s*(#+\w*-?\w*)", comment)
+    ns = ns_match.group(1) if ns_match else None
+    if ns:
+        ns = re.sub(r"^#+", "#", ns)
+    equipo = equipo_match.group(1) if equipo_match else None
+
+    return equipo, ns
+
+
+def get_end_week(row, sheet):
+    weeks = []
+    pool_changeout_types = []
+    row_idx = int(row.name.strip("N°"))
+    for col_idx in range(0, row.__len__()):
+        if col_idx > 2:
+            prev_cell = sheet[row_idx][col_idx - 1]
+            cell = sheet[row_idx][col_idx]
+            if (
+                (prev_cell.fill.fgColor.rgb != cell.fill.fgColor.rgb)
+                & (prev_cell.value is None)
+                & (prev_cell.fill.fgColor.rgb in ["FFEDBFBB", "FFC5E0B4", "FFE88880"])
+                & (prev_cell.fill.fgColor.rgb in ["FFC5E0B4", "FFE88880"])
+            ) | (
+                (prev_cell.fill.start_color.theme != cell.fill.start_color.theme)
+                & (prev_cell.value is None)
+                & (prev_cell.fill.start_color.theme == 9)
+            ):
+                # | (
+                #     (prev_cell.fill.fgColor.tint != cell.fill.fgColor.tint)
+                #     & (prev_cell.fill.fgColor.tint != 0)
+                #     & (prev_cell.value is None)
+                #     # & (prev_cell.fill.fgColor.rgb in ["FFC5E0B4", "FFE88880"])
+                # ):
+                weeks.append(list(row.keys())[col_idx - 2])
+                if prev_cell.fill.fgColor.rgb in ["FFEDBFBB", '"FFE88880"']:
+                    pool_changeout_types.append("I")
+                else:
+                    pool_changeout_types.append("P")
+
+    return pd.Series({"weeks": weeks, "pool_changeout_type": pool_changeout_types})
+
+
 def data_fixes(df):
     # Mal puesta la fecha de inicio de cambio de motor de tracción en el pool slot 6
     df.loc[
@@ -71,34 +136,37 @@ def read_archived_pool_proj():
         account_url=os.environ["AZURE_ACCOUNT_URL"],
         credential=os.environ["AZURE_SAS_TOKEN"],
     )
-
-    container_client = blob_service_client.get_container_client(os.environ["AZURE_CONTAINER_NAME"])
-    blob_list = container_client.list_blobs(
-        name_starts_with=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/ARCHIVED_PLAN"
+    blob_client = blob_service_client.get_blob_client(
+        container=os.environ["AZURE_CONTAINER_NAME"],
+        blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/2023.01 Pool Componentes MEL Planificadores.xlsx",
     )
-    blob_list = [f.name for f in blob_list]
-    frames = []
-    for file in blob_list:
+    blob_data = blob_client.download_blob()
+    blob_data = BytesIO(blob_data.readall())
+    components = {"bp": {"start_row": 20, "end_row": 33, "start_column": "F", "end_column": "EF"}}
 
-        # Read the Excel file
-        blob_client = blob_service_client.get_blob_client(
-            container=os.environ["AZURE_CONTAINER_NAME"],
-            blob=file,
-        )
-        blob_data = blob_client.download_blob()
-        blob_data = BytesIO(blob_data.readall())
+    frames = []
+    for component in components:
         wb = openpyxl.load_workbook(blob_data, data_only=True)
 
-        sheet = wb.active
+        sheet = wb["PROYECCIÓN"]
 
+        start_row, end_row, start_column, end_column = components[component].values()
         # Create a DataFrame from the Excel data
-        data = []
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-            data.append(row)
+        sheet = sheet[f"{start_column}{start_row}:{end_column}{end_row}"]
+        data = []  # .iter_rows(min_row=20, values_only=True)
+        for row in sheet:
+            data.append([cell.value for cell in row])
 
         df = pd.DataFrame(data, columns=[cell.value for cell in sheet[1]])
         df.set_index(df.columns[0], inplace=True)
+        df = df.iloc[1:]
+        # Generate date range
+        date_range = pd.date_range(start="2023-07-03", end="2025-12-31", freq="W-MON")
 
+        # Create the list of week strings
+        week_list = [f"{date.isocalendar()[0]}-W{date.isocalendar()[1]}" for date in date_range]
+
+        df.columns = week_list[:-1]
         # Process the dataframe
         changeouts_df = (
             df.apply(lambda x: get_weeks_and_comments(x, sheet), axis=1)
@@ -132,7 +200,7 @@ def read_archived_pool_proj():
             left_on="changeout_date",
             right_on="arrival_date",
             direction="forward",
-        ).assign(component_code=file.split("-")[-1].split(".")[0])
+        ).assign(component_code=component)
         frames.append(df)
 
     df = pd.concat(frames)
