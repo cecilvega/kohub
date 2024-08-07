@@ -26,7 +26,9 @@ def get_weeks_and_comments(row, sheet):
 
 
 def idx_to_pool_slot(df):
-    df = df.rename_axis("pool_slot").reset_index().assign(pool_slot=lambda x: x["pool_slot"].str.strip("N°"))
+    df = (
+        df.rename_axis("pool_slot").reset_index().assign(pool_slot=lambda x: x["pool_slot"].str.strip("N°").astype(int))
+    )
     return df
 
 
@@ -45,6 +47,8 @@ def get_end_week(row, sheet):
     weeks = []
     pool_changeout_types = []
     row_idx = int(row.name.strip("N°"))
+    breakdown_colours = ["FFEDBFBB", "FFC5E0B4", "FFE88880"]
+
     for col_idx in range(0, row.__len__()):
         if col_idx > 2:
             prev_cell = sheet[row_idx][col_idx - 1]
@@ -52,8 +56,7 @@ def get_end_week(row, sheet):
             if (
                 (prev_cell.fill.fgColor.rgb != cell.fill.fgColor.rgb)
                 & (prev_cell.value is None)
-                & (prev_cell.fill.fgColor.rgb in ["FFEDBFBB", "FFC5E0B4", "FFE88880"])
-                & (prev_cell.fill.fgColor.rgb in ["FFC5E0B4", "FFE88880"])
+                & (prev_cell.fill.fgColor.rgb in breakdown_colours)
             ) | (
                 (prev_cell.fill.start_color.theme != cell.fill.start_color.theme)
                 & (prev_cell.value is None)
@@ -66,7 +69,7 @@ def get_end_week(row, sheet):
                 #     # & (prev_cell.fill.fgColor.rgb in ["FFC5E0B4", "FFE88880"])
                 # ):
                 weeks.append(list(row.keys())[col_idx - 2])
-                if prev_cell.fill.fgColor.rgb in ["FFEDBFBB", '"FFE88880"']:
+                if prev_cell.fill.fgColor.rgb in breakdown_colours:
                     pool_changeout_types.append("I")
                 else:
                     pool_changeout_types.append("P")
@@ -131,7 +134,7 @@ def data_fixes(df):
     return df
 
 
-def read_archived_pool_proj():
+def read_base_pool_proj():
     blob_service_client = BlobServiceClient(
         account_url=os.environ["AZURE_ACCOUNT_URL"],
         credential=os.environ["AZURE_SAS_TOKEN"],
@@ -142,15 +145,26 @@ def read_archived_pool_proj():
     )
     blob_data = blob_client.download_blob()
     blob_data = BytesIO(blob_data.readall())
-    components = {"bp": {"start_row": 20, "end_row": 33, "start_column": "F", "end_column": "EF"}}
+    start_column = "F"
+    end_column = "EF"
+    components = {
+        "bp": {"start_row": 20, "end_row": 33},
+        "cd": {"start_row": 40, "end_row": 56},
+        "mt": {"start_row": 98, "end_row": 110},
+        "st": {"start_row": 63, "end_row": 75},
+        "cms": {"start_row": 80, "end_row": 92},
+        "cl": {"start_row": 115, "end_row": 128},
+        "mp": {"start_row": 146, "end_row": 153},
+    }
 
     frames = []
     for component in components:
+
         wb = openpyxl.load_workbook(blob_data, data_only=True)
 
         sheet = wb["PROYECCIÓN"]
 
-        start_row, end_row, start_column, end_column = components[component].values()
+        start_row, end_row = components[component].values()
         # Create a DataFrame from the Excel data
         sheet = sheet[f"{start_column}{start_row}:{end_column}{end_row}"]
         data = []  # .iter_rows(min_row=20, values_only=True)
@@ -189,6 +203,7 @@ def read_archived_pool_proj():
             .rename(columns={"weeks": "arrival_week"})
             .pipe(idx_to_pool_slot)
         )
+
         arrivals_df = arrivals_df.assign(
             arrival_date=arrivals_df["arrival_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
         )

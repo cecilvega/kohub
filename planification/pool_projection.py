@@ -10,21 +10,16 @@ from plotly import graph_objects as go
 from azure.storage.blob import BlobServiceClient
 from io import BytesIO
 from planification.pool import *
-from datetime import datetime
+from datetime import datetime, date
 
 st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
 styler()
 
 
-available_components = [
-    "bp",
-    # "cd",
-    "mt",
-    # "st", "cms", "cl", "mp"
-]
+available_components = ["bp", "cd", "mt", "st", "cms", "cl", "mp"]
 cc_df = read_cc()
 cc_df = cc_df.loc[~((cc_df["component_code"] == "mt") & ~(cc_df["subcomponente"].str.contains("MOTOR TRACCIÓN")))]
-pool_proj_df = read_archived_pool_proj().drop(columns=["changeout_date"])
+pool_proj_df = read_base_pool_proj().drop(columns=["changeout_date"])
 cc_df = cc_df.loc[cc_df["component_code"].isin(available_components)].reset_index(drop=True)
 pool_proj_df = pool_proj_df.loc[pool_proj_df["component_code"].isin(available_components)].reset_index(drop=True)
 
@@ -140,7 +135,7 @@ def plot_pool_timeline(df):
             showgrid=False,
         ),
         yaxis=dict(
-            title="Component",
+            title="Asignación de Pool",
             automargin=True,
             showticklabels=True,
             tickmode="array",
@@ -228,6 +223,19 @@ def plot_pool_timeline(df):
 # blob_data = blob_client.download_blob()
 # blob_data = BytesIO(blob_data.readall())
 # df = pd.read_csv(blob_data)
+
+# TODO: Cambiar a fecha móvil
+today = datetime.now()
+jan_1 = date(today.year, 1, 1)
+dec_31 = date(today.year, 12, 31)
+
+d = st.date_input(
+    "Select your vacation for next year",
+    (jan_1, max_date),
+    min_date,
+    max_date,
+    format="MM.DD.YYYY",
+)
 
 fig = plot_pool_timeline(df)
 
