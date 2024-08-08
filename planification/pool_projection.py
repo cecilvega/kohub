@@ -18,7 +18,12 @@ styler()
 
 available_components = ["bp", "cd", "mt", "st", "cms", "cl", "mp"]
 cc_df = read_cc()
-cc_df = cc_df.loc[~((cc_df["component_code"] == "mt") & ~(cc_df["subcomponente"].str.contains("MOTOR TRACCIÓN")))]
+cc_df = cc_df.loc[
+    ~(
+        (cc_df["component_code"] == "mt") & ~(cc_df["subcomponente"].str.contains("MOTOR TRACCIÓN"))
+        | (cc_df["component_code"] == "cms") & ~(cc_df["subcomponente"].str.contains("Suspension Delantera"))
+    )
+]
 pool_proj_df = read_base_pool_proj().drop(columns=["changeout_date"])
 cc_df = cc_df.loc[cc_df["component_code"].isin(available_components)].reset_index(drop=True)
 pool_proj_df = pool_proj_df.loc[pool_proj_df["component_code"].isin(available_components)].reset_index(drop=True)
