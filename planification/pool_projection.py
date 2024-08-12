@@ -17,19 +17,27 @@ styler()
 
 
 available_components = ["bp", "cd", "mt", "st", "cms", "cl", "mp"]
-cc_df = read_cc()
-cc_df = cc_df.loc[
-    ~(
-        (cc_df["component_code"] == "mt") & ~(cc_df["subcomponente"].str.contains("MOTOR TRACCIÓN"))
-        | (cc_df["component_code"] == "cms") & ~(cc_df["subcomponente"].str.contains("Suspension Delantera"))
-    )
-]
-pool_proj_df = read_base_pool_proj().drop(columns=["changeout_date"])
-cc_df = cc_df.loc[cc_df["component_code"].isin(available_components)].reset_index(drop=True)
-pool_proj_df = pool_proj_df.loc[pool_proj_df["component_code"].isin(available_components)].reset_index(drop=True)
 
-df = generate_pool_projection(cc_df, pool_proj_df)
 
+@st.cache_data
+def fetch_and_clean_data():
+    cc_df = read_cc()
+    cc_df = cc_df.loc[
+        ~(
+            (cc_df["component_code"] == "mt") & ~(cc_df["subcomponente"].str.contains("MOTOR TRACCIÓN"))
+            | (cc_df["component_code"] == "cms") & ~(cc_df["subcomponente"].str.contains("Suspension Delantera"))
+            | (cc_df["component_code"] == "mp") & ~(cc_df["subcomponente"].str.contains("MOTOR"))
+        )
+    ]
+    pool_proj_df = read_base_pool_proj().drop(columns=["changeout_date"])
+    cc_df = cc_df.loc[cc_df["component_code"].isin(available_components)].reset_index(drop=True)
+    pool_proj_df = pool_proj_df.loc[pool_proj_df["component_code"].isin(available_components)].reset_index(drop=True)
+
+    df = generate_pool_projection(cc_df, pool_proj_df)
+    return df
+
+
+df = fetch_and_clean_data()
 df[["changeout_date", "arrival_date"]] = df[["changeout_date", "arrival_date"]].apply(
     lambda x: pd.to_datetime(x, format="%Y-%m-%d")
 )
@@ -63,9 +71,11 @@ componente = st.selectbox(
 )
 
 df = df.loc[df["componente"] == componente].reset_index(drop=True)
-df = df.assign(pool_slot=df["pool_slot"].astype(str))
-
-
+# df = df.assign(pool_slot=df["pool_slot"].astype(str))
+df = df.assign(pool_slot=df["pool_slot"].max() - df["pool_slot"] + 1).sort_values(
+    ["pool_slot", "arrival_date"], ascending=True
+)
+# df['reversed_slot'] = df['pool_slot'].max() - df['pool_slot'] + 1
 # Date slider
 min_date = df["changeout_date"].min().date()
 max_date = df["arrival_date"].max().date()
@@ -118,7 +128,7 @@ def plot_pool_timeline(df):
         height=500,
         title="Cambios Reales Ejecutados",
     )
-
+    fig.for_each_trace(lambda t: t.update(name={"I": "Imprevisto", "P": "Planificado"}[t.name]))
     fig.update_layout(
         xaxis=dict(
             tickformat="W%V",
@@ -216,19 +226,6 @@ def plot_pool_timeline(df):
     return fig
 
 
-# blob_service_client = BlobServiceClient(
-#     account_url=os.environ["AZURE_ACCOUNT_URL"],
-#     credential=os.environ["AZURE_SAS_TOKEN"],
-# )
-#
-# blob_client = blob_service_client.get_blob_client(
-#     container=os.environ["AZURE_CONTAINER_NAME"],
-#     blob=f"{os.environ['AZURE_PREFIX']}/pool-consolidated.csv",
-# )
-# blob_data = blob_client.download_blob()
-# blob_data = BytesIO(blob_data.readall())
-# df = pd.read_csv(blob_data)
-
 # TODO: Cambiar a fecha móvil
 today = datetime.now()
 jan_1 = date(today.year, 1, 1)
@@ -242,6 +239,6 @@ d = st.date_input(
     format="MM.DD.YYYY",
 )
 
-fig = plot_pool_timeline(df)
+fig = plot_pool_timeline(df.loc[df["arrival_date"].dt.date.between(d[0], d[1])])
 
 st.plotly_chart(fig, use_container_width=True)
