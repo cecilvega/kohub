@@ -12,7 +12,7 @@ from io import BytesIO
 from planification.pool import *
 from datetime import datetime, date
 
-st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
+# st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
 styler()
 
 

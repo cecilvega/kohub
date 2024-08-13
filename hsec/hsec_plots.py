@@ -29,7 +29,7 @@ def generate_3d_dashboard(file):
         adherence=adherence_df["Estado Informe Final"].map(
             lambda x: {"NO APLICA 3D": "VIGENTE", "SIN 3D": "NO VIGENTE", "No Vigente": "NO VIGENTE"}.get(x, x)
         )
-    )
+    ).dropna(subset=["Rut/Passport"])
 
     performance_df = (
         pd.read_excel(
@@ -43,12 +43,22 @@ def generate_3d_dashboard(file):
         .dropna(subset=["Rut/Passport"])
     )
 
+    performance_df = pd.merge(
+        adherence_df[["Rut/Passport", "Estado Informe Final"]],
+        performance_df,
+        on="Rut/Passport",
+        how="left",
+    )
+
+    performance_df = performance_df.loc[
+        performance_df["Estado Informe Final"].isin(["VIGENTE", "NO VIGENTE"])
+    ].reset_index(drop=True)
+
     # df = pd.merge(adherencia_df, desempeno_df, on="Rut/Passport", how="outer").reset_index(drop=True)
 
     # adherencia_df = df.loc[df["Estado Informe Final 3D"].isin(["VIGENTE", "NO APLICA 3D"])]
 
     total_contrato = adherence_df.__len__()
-    # st.write(adherence_df.__len__())
 
     adherencia_3d = round(
         adherence_df.loc[adherence_df["Estado Informe Final"].isin(["VIGENTE", "NO APLICA 3D"])].__len__()
@@ -76,7 +86,7 @@ def generate_3d_dashboard(file):
     # Function to create donut chart
     def create_donut_chart(value, title, color):
         fig = go.Figure(
-            go.Pie(labels=["", title], values=[100 - value, value], hole=0.7, marker_colors=["#f0f0f0", color])
+            go.Pie(labels=["", title], values=[100 - value, value], hole=0.7, marker_colors=["#d1d4d3", color])
         )
         fig.update_layout(
             annotations=[dict(text=f"{value}%", x=0.5, y=0.5, font_size=20, showarrow=False)],
@@ -90,7 +100,7 @@ def generate_3d_dashboard(file):
     # Adherencia 3D
     with col1:
         st.subheader("Adherencia 3D")
-        st.plotly_chart(create_donut_chart(adherencia_3d, "Adherencia 3D", "#4169E1"), use_container_width=True)
+        st.plotly_chart(create_donut_chart(adherencia_3d, "Adherencia 3D", "#140a9a"), use_container_width=True)
         st.markdown(
             "**Adherencia**: mide el % de personas con diagnóstico *Vigente* y eximidos (**No Aplica 3D**), con respecto al total del contrato"
         )
@@ -113,12 +123,12 @@ def generate_3d_dashboard(file):
         with subcol1:
             st.markdown("**Supervisores**")
             st.plotly_chart(
-                create_donut_chart(desempeno_supervisores, "Desempeño 3D", "#8A2BE2"), use_container_width=True
+                create_donut_chart(desempeno_supervisores, "Desempeño 3D", "#7030a0"), use_container_width=True
             )
 
         with subcol2:
             st.markdown("**Técnicos**")
-            st.plotly_chart(create_donut_chart(desempeno_tecnicos, "Desempeño 3D", "#8A2BE2"), use_container_width=True)
+            st.plotly_chart(create_donut_chart(desempeno_tecnicos, "Desempeño 3D", "#7030a0"), use_container_width=True)
         barplot_df = performance_df.groupby("Resultado Final").size().reset_index(name="count")
         fig = px.bar(barplot_df, x="Resultado Final", y="count")  # , title="Wide-Form Input"
         st.plotly_chart(fig, use_container_width=True)
