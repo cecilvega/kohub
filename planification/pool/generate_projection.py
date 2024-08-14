@@ -85,10 +85,50 @@ def allocate_components(cc_df: pd.DataFrame, pool_slots_df: pd.DataFrame) -> pd.
     return pool_slots_df
 
 
-def generate_pool_projection(cc_df: pd.DataFrame, pool_proj_df: pd.DataFrame) -> pd.DataFrame:
+def priority_sort(df):
+    priority_map = {
+        "mt": {
+            "MOTOR TRACCIÓN": 1,
+        },
+        "cms": {
+            "Suspension Delantera": 1,
+        },
+        "mp": {
+            "MOTOR": 1,
+            "Alternador Principal": 2,
+            "Radiador": 3,
+        },  # MOTOR is priority 1
+    }
+    default_priority = 999  # High number for lowest priority
+
+    def get_priority(row):
+        component_priorities = priority_map.get(row["component_code"], {})
+        for subcomponent, priority in component_priorities.items():
+            if subcomponent in row["subcomponente"]:
+                return priority
+        return default_priority
+
+    df["subcomponent_priority"] = df.apply(get_priority, axis=1)
+    return df
+
+
+def generate_pool_projection(
+    cc_df: pd.DataFrame, pool_proj_df: pd.DataFrame, available_components: list
+) -> pd.DataFrame:
     """
     Generate pool projection based on component changeouts and existing pool projections.
     """
+    # Assuming cc_df is your original DataFrame
+    cc_df = priority_sort(cc_df)
+
+    # Sort the DataFrame by changeout_date, component_code, and priority
+    cc_df = cc_df.sort_values(
+        ["equipo", "changeout_date", "component_code", "position", "subcomponent_priority"]
+    ).drop_duplicates(subset=["equipo", "component_code", "position", "changeout_date"])
+
+    cc_df = cc_df.loc[cc_df["component_code"].isin(available_components)].reset_index(drop=True)
+    pool_proj_df = pool_proj_df.loc[pool_proj_df["component_code"].isin(available_components)].reset_index(drop=True)
+
     merge_columns = ["equipo", "component_code", "component_serial", "changeout_week"]
 
     pool_slots_df = pd.merge(pool_proj_df, cc_df, on=merge_columns, how="left", suffixes=("_proj", ""))
@@ -97,7 +137,15 @@ def generate_pool_projection(cc_df: pd.DataFrame, pool_proj_df: pd.DataFrame) ->
         pool_slots_df["pool_changeout_type_proj"]
     )
     pool_slots_df = pool_slots_df.drop(columns="pool_changeout_type_proj")
-    pool_slots_df = pool_slots_df.dropna(subset=["changeout_date"])
+    pool_slots_df = pool_slots_df.assign(
+        changeout_date=np.where(
+            pool_slots_df["changeout_date"].isnull(),
+            pool_slots_df["changeout_date_proj"],
+            pool_slots_df["changeout_date"],
+        )
+    )
+    assert pool_slots_df["changeout_date"].notnull().all()
+    # pool_slots_df = pool_slots_df.dropna(subset=["changeout_date"])
 
     missing_cc_df = cc_df[cc_df["changeout_date"] >= datetime(2024, 6, 1)]
     missing_cc_df = (
@@ -112,5 +160,24 @@ def generate_pool_projection(cc_df: pd.DataFrame, pool_proj_df: pd.DataFrame) ->
         .drop(columns="_merge")
         .assign(pool_changeout_type=lambda x: x["pool_changeout_type"].fillna("P"))
     )
+    df = allocate_components(missing_cc_df, pool_slots_df)
+    df = pd.concat([pool_slots_df, df]).reset_index(drop=True)
 
-    return allocate_components(missing_cc_df, pool_slots_df)
+    df[["changeout_date", "arrival_date"]] = df[["changeout_date", "arrival_date"]].apply(
+        lambda x: pd.to_datetime(x, format="%Y-%m-%d")
+    )
+
+    df = df.assign(
+        componente=df["component_code"].map(
+            lambda x: {
+                "bp": "Blower",
+                "cd": "Cilindro Dirección",
+                "st": "Suspensión Trasera",
+                "cms": "CMSD",
+                "mt": "Motor Tracción",
+                "cl": "Cilindro Levante",
+                "mp": "Módulo Potencia",
+            }[x]
+        )
+    )
+    return df

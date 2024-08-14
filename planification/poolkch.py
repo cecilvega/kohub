@@ -10,52 +10,51 @@ from plotly import graph_objects as go
 from azure.storage.blob import BlobServiceClient
 from io import BytesIO
 from planification.pool import *
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+
 
 # st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
 styler()
 
-
 available_components = ["bp", "cd", "mt", "st", "cms", "cl", "mp"]
 
 
-@st.cache_data
+st.markdown(
+    """
+## Estado de los Componentes
+
+| Componente | Estado | 
+|------------|--------|
+| Blower | 🔜 Próximamente |
+| Cilindro Dirección | 🔜 Próximamente |
+| Suspensión Trasera | 🔜 Próximamente |
+| CMSD | 🔜 Próximamente |
+| Motor Tracción | 🔜 Próximamente |
+| Cilindro Levante | 🔜 Próximamente |
+| Módulo Potencia | ✅ Funcionando |
+---
+
+"""
+)
+
+
+@st.cache_data(ttl=timedelta(hours=1))
 def fetch_and_clean_data():
     cc_df = read_cc()
-    cc_df = cc_df.loc[
-        ~(
-            (cc_df["component_code"] == "mt") & ~(cc_df["subcomponente"].str.contains("MOTOR TRACCIÓN"))
-            | (cc_df["component_code"] == "cms") & ~(cc_df["subcomponente"].str.contains("Suspension Delantera"))
-            | (cc_df["component_code"] == "mp") & ~(cc_df["subcomponente"].str.contains("MOTOR"))
-        )
-    ]
-    pool_proj_df = read_base_pool_proj().drop(columns=["changeout_date"])
+
+    pool_proj_df = read_base_pool_proj()
     cc_df = cc_df.loc[cc_df["component_code"].isin(available_components)].reset_index(drop=True)
     pool_proj_df = pool_proj_df.loc[pool_proj_df["component_code"].isin(available_components)].reset_index(drop=True)
 
-    df = generate_pool_projection(cc_df, pool_proj_df)
+    df = generate_pool_projection(cc_df, pool_proj_df, available_components)
     return df
 
 
 df = fetch_and_clean_data()
-df[["changeout_date", "arrival_date"]] = df[["changeout_date", "arrival_date"]].apply(
-    lambda x: pd.to_datetime(x, format="%Y-%m-%d")
-)
 
+# Drop missing components
+df = df.dropna(subset=["arrival_date"]).reset_index(drop=True)
 
-df = df.assign(
-    componente=df["component_code"].map(
-        lambda x: {
-            "bp": "Blower",
-            "cd": "Cilindro Dirección",
-            "st": "Suspensión Trasera",
-            "cms": "CMSD",
-            "mt": "Motor Tracción",
-            "cl": "Cilindro Levante",
-            "mp": "Módulo Potencia",
-        }[x]
-    )
-)
 componente = st.selectbox(
     "Selección de Componente",
     options=(
@@ -67,47 +66,44 @@ componente = st.selectbox(
         "Cilindro Levante",
         "Módulo Potencia",
     ),
-    index=4,
+    index=6,
 )
 
 df = df.loc[df["componente"] == componente].reset_index(drop=True)
 # df = df.assign(pool_slot=df["pool_slot"].astype(str))
-df = df.assign(pool_slot=df["pool_slot"].max() - df["pool_slot"] + 1).sort_values(
-    ["pool_slot", "arrival_date"], ascending=True
-)
+
 # df['reversed_slot'] = df['pool_slot'].max() - df['pool_slot'] + 1
 # Date slider
 min_date = df["changeout_date"].min().date()
 max_date = df["arrival_date"].max().date()
-current_date = st.slider(
-    "Select Date", min_value=min_date, max_value=max_date, value=datetime.now().date(), format="YYYY-MM-DD"
-)
-
+current_date = datetime.now().date()
 # Filter and sort data
 filtered_df = df[df["arrival_date"].dt.date > current_date].sort_values("arrival_date")
-
 # Use drop_duplicates to keep only the first occurrence for each pool_number
 filtered_df = filtered_df.drop_duplicates(subset="pool_slot", keep="first")
-
 # Display upcoming arrivals using columns and metrics
-st.subheader("Upcoming Component Arrivals")
+st.subheader("Próximas llegadas de componente")
 if not filtered_df.empty:
     columns = st.columns(4)
     for i, (_, row) in enumerate(filtered_df.iterrows()):
         with columns[i % 4]:
             days_until_arrival = (row["arrival_date"].date() - current_date).days
+            if row["pool_changeout_type"] == "U":
+                days_until_arrival = "?"
+                row["arrival_week"] = "?"
             # repair_days = row["ohv_normal"] if row["pool_type"] == "P" else row["ohv_unplanned"]
             # repair_color = "normal" if row["pool_type"] == "P" else "inverse"
 
             st.metric(
                 label=f"Equipo {row['equipo']}",
-                value=f"{days_until_arrival} para llegada",
+                value=f"{days_until_arrival} días restantes",
                 # delta=f"{repair_days} days repair",
                 # delta_color=repair_color,
             )
-            st.write(f"Fecha llegada: {row['arrival_date'].date()}")
+            st.write(f"Semana estimada de llegada: {row['arrival_week']}")
             st.write(f"Fecha cambio componente: {row['changeout_date'].date()}")
-            st.write(f"Tipo de cambio: {row['pool_changeout_type']}")
+            map_dict = {"I": "Imprevisto", "P": "Planificado", "U": "Pendiente"}
+            st.write(f"Tipo de cambio: {map_dict[row['pool_changeout_type']]}")
             st.write("---")
 else:
     st.write("No upcoming arrivals for the selected date.")
@@ -116,19 +112,38 @@ else:
 def plot_pool_timeline(df):
     # Create the Gantt chart
     pool_numbers = sorted(df["pool_slot"].unique())
-    grid_positions = [-0.5] + [i + 0.5 for i in range(len(pool_numbers))]
+    grid_positions = [i + 0.5 for i in range(len(pool_numbers))] + [len(pool_numbers) + 0.5]
+
     fig = px.timeline(
         df,
         x_start="changeout_date",
         x_end="arrival_date",
         y="pool_slot",
         color="pool_changeout_type",
-        color_discrete_map={"I": "red", "P": "green"},
+        color_discrete_map={"I": "red", "P": "green", "U": "gray"},
         hover_data=["pool_slot", "changeout_date", "arrival_date", "equipo", "component_serial"],
         height=500,
         title="Cambios Reales Ejecutados",
     )
-    fig.for_each_trace(lambda t: t.update(name={"I": "Imprevisto", "P": "Planificado"}[t.name]))
+    fig.for_each_trace(lambda t: t.update(name={"I": "Imprevisto", "P": "Planificado", "U": "Pendiente"}[t.name]))
+
+    # Add a vertical line for the current week
+    current_date = datetime.now().date()
+    fig.add_vline(x=current_date, line_width=2, line_dash="dash", line_color="black")
+    # Add an annotation for the current week line
+    fig.add_annotation(
+        x=current_date,
+        y=1,  # This positions the text at the top of the plot
+        text="Hoy",
+        showarrow=True,
+        arrowhead=2,
+        arrowsize=1,
+        arrowwidth=2,
+        arrowcolor="black",
+        ax=50,  # Offset the arrow in x direction
+        ay=-30,  # Offset the arrow in y direction
+    )
+
     fig.update_layout(
         xaxis=dict(
             tickformat="W%V",
@@ -150,6 +165,7 @@ def plot_pool_timeline(df):
             showgrid=False,
         ),
         yaxis=dict(
+            autorange="reversed",
             title="Asignación de Pool",
             automargin=True,
             showticklabels=True,

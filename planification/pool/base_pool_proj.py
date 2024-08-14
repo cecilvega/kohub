@@ -131,6 +131,26 @@ def data_fixes(df):
         "changeout_week",
     ] = "2024-W7"
 
+    df = pd.concat(
+        [
+            df,
+            pd.DataFrame.from_dict(
+                {
+                    "pool_slot": [1, 3, 7],
+                    "component_code": ["mp", "mp", "mp"],
+                    "equipo": ["855", "852", "320"],
+                    "changeout_week": ["2024-W24", "2024-W18", "2024-W31"],
+                    "component_serial": ["#EE14010714", "???", "???"],
+                    "arrival_week": ["2024-W31", "2024-W52", "2024-W40"],
+                    "pool_changeout_type": ["I", "U", "I"],
+                }
+            ).assign(
+                changeout_date=lambda x: x["changeout_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w")),
+                arrival_date=lambda x: x["arrival_week"].map(lambda x: datetime.strptime(x + "-6", "%Y-W%W-%w")),
+            ),
+        ]
+    )
+
     return df
 
 
@@ -205,7 +225,7 @@ def read_base_pool_proj():
         )
 
         arrivals_df = arrivals_df.assign(
-            arrival_date=arrivals_df["arrival_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
+            arrival_date=arrivals_df["arrival_week"].map(lambda x: datetime.strptime(x + "-6", "%Y-W%W-%w"))
         )
 
         df = pd.merge_asof(

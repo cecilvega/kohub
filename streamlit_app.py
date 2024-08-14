@@ -5,9 +5,8 @@ import hashlib
 import time
 from collections import defaultdict
 
-import streamlit as st
 
-st.set_page_config(layout="wide")  # page_title="DevOps", page_icon=":bar_chart:",
+st.set_page_config(layout="wide", page_icon="🚜")  # page_title="DevOps", page_icon=":bar_chart:",
 if "role" not in st.session_state:
     st.session_state.role = None
 ROLES = {"Komatsu": ["derek"], "BHP": ["mel"]}
@@ -75,10 +74,16 @@ def login():
 
     st.header("Log in")
     role = st.selectbox("Choose your role", [None, *list(ROLES.keys())])
-    username = st.text_input("Username", key="username")
-    password = st.text_input("Password", type="password", key="password")
+    st.text_input("Username", key="username")
+    st.text_input("Password", type="password", key="password")
+    # For debugging purposes skip login
+    if os.environ.get("USERNAME") == "cecilvega":
+        st.session_state.logged_in = True
+        st.session_state.role = "Komatsu"
+        st.rerun()
     if st.button("Log in"):
         password_entered(role)
+
         # Return True if the username + password is validated.
         if st.session_state.get("password_correct", False):
             st.session_state.logged_in = True
@@ -97,25 +102,27 @@ role = st.session_state.role
 logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
 settings = st.Page("settings.py", title="Settings", icon=":material/settings:")
 
-bhp_1 = st.Page(
-    "bhp/bhp_1.py",
-    title="BHP 1",
+bhp_home = st.Page(
+    "bhp/home.py",
+    title="Home",
     icon=":material/healing:",
     default=(role == "BHP"),
 )
-komatsu_1 = st.Page(
-    "admin/home.py",
-    title="Home",
+komatsu_home = st.Page(
+    "komatsu/inicio.py",
+    title="Inicio",
     icon=":material/person_add:",
     default=(role == "Komatsu"),
 )
 
-pool_proyection = st.Page("planification/pool_projection.py", title="Proyección Pool")  # , icon=":material/dashboard:"
 
+pool_proyection = st.Page("planification/poolkch.py", title="Pool KCH")  # , icon=":material/dashboard:"
+hse_3d = st.Page("hse/3d.py", title="3D")  # , icon=":material/dashboard:"
 
-account_pages = [logout_page, settings]
-bhp_pages = [bhp_1, pool_proyection]
-komatsu_pages = [komatsu_1]
+# settings
+account_pages = [logout_page]
+bhp_pages = [bhp_home, pool_proyection]
+komatsu_pages = [komatsu_home, hse_3d]
 
 st.title("MEL")
 st.logo(
@@ -139,14 +146,14 @@ pg.run()
 
 # from collections import defaultdict
 #
-# home = st.Page("../admin/home.py", title="Home", default=True)  # icon=":material/dashboard:"
+# home = st.Page("../komatsu/inicio.py", title="Home", default=True)  # icon=":material/dashboard:"
 # pool_proyection = st.Page(
-#     "../planification/pool_projection.py", title="Proyección Pool"
+#     "../planification/poolkch.py", title="Proyección Pool"
 # )  # , icon=":material/dashboard:"
 # pool_nsc_detail = st.Page("../planification/poo_nsc_detail.py", title="NSC Detalle")  # , icon=":material/dashboard:"
 # pool_nsc_general = st.Page("../planification/pool_nsc_general.py", title="NSC General")  # , icon=":material/dashboard:"
 #
-# hsec_3d = st.Page("../hsec/3d.py", title="3D")  # , icon=":material/dashboard:"
+# hsec_3d = st.Page("../hse/3d.py", title="3D")  # , icon=":material/dashboard:"
 #
 # pg = st.navigation(
 #     {

@@ -12,9 +12,9 @@ import calendar
 from azure.storage.blob import BlobServiceClient
 from datetime import datetime
 from io import BytesIO
-from hsec.hsec_plots import generate_3d_dashboard
+from hse.hse_plots import generate_3d_dashboard
 
-st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
+
 styler()
 
 # st.metric(label="Temperature", value="70 °F", delta="1.2 °F")

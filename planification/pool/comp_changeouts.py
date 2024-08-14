@@ -17,7 +17,7 @@ def read_cc():
     )
     blob_data = blob_client.download_blob()
     blob_data = BytesIO(blob_data.readall())
-    cc_df = pd.read_excel(blob_data)
+    df = pd.read_excel(blob_data)
     columns_map = {
         "EQUIPO": "equipo",
         "COMPONENTE": "componente",
@@ -29,8 +29,8 @@ def read_cc():
         "HORA CC": "component_hours",
         "TBO": "tbo_hours",
     }
-    cc_df = (
-        cc_df[list(columns_map.keys())]
+    df = (
+        df[list(columns_map.keys())]
         .dropna(subset=["COMPONENTE"])
         .rename(columns=columns_map)
         .assign(
@@ -53,11 +53,12 @@ def read_cc():
         )
         .dropna(subset=["component_code"])
     )
-    cc_df = cc_df.assign(
+    df = df.assign(component_serial=df["component_serial"].str.strip().str.replace("\t", ""))
+    df = df.assign(
         changeout_week=lambda x: x["changeout_date"]
         .dt.year.astype(str)
         .str.cat(x["changeout_week"].astype(str), sep="-W")
     )
-    cc_df = cc_df.assign(pool_changeout_type=None)
+    df = df.assign(pool_changeout_type=None)
 
-    return cc_df
+    return df
