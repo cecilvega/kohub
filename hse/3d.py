@@ -12,7 +12,7 @@ import calendar
 from azure.storage.blob import BlobServiceClient
 from datetime import datetime
 from io import BytesIO
-from hse.hse_plots import generate_3d_dashboard
+from hse.hse_plots import generate_3d_dashboard, load_new_format, load_old_format
 
 
 styler()
@@ -44,13 +44,26 @@ file = blob_list[0]
 file1 = blob_list[1]
 
 # df = pd.read_excel(blob_data)
-tab1, tab2 = st.tabs(["Opción 1", "Opción 2"])
+tab1, tab2, tab3, tab4 = st.tabs(["Mayo 2024", "Junio 2024", "Julio 2024", "Julio 2024 V2"])
 with tab1:
-    st.write(f"Opción 1: {file}")
-    generate_3d_dashboard(file)
+    # st.write(f"Opción 1: {file}")
+    file = "FAENAS/ESCONDIDA/y=2023/m=09/MEL_Septiembre_2023/TK848/HSEC/y=2024/m=07/3D_MAYO-2024.xlsx"
+    df = load_old_format(file)
+    generate_3d_dashboard(df)
 with tab2:
-    st.write(f"Opción 2: {file1}")
-    generate_3d_dashboard(file1)
+    # st.write(f"Opción 2: {file1}")
+    file = "FAENAS/ESCONDIDA/y=2023/m=09/MEL_Septiembre_2023/TK848/HSEC/y=2024/m=07/3D_JUNIO-2024.xlsx"
+    df = load_old_format(file)
+    generate_3d_dashboard(df)
+with tab3:
+    # st.write(f"Opción 1: {file}")
+    file = "FAENAS/ESCONDIDA/y=2023/m=09/MEL_Septiembre_2023/TK848/HSEC/y=2024/m=07/KOMATSU CHILE S A_Detalle Cumplimiento Empresa Programa FLP_Julio 2024 Rev 3D Derek.xlsx"
+    df = load_new_format(file)
+    generate_3d_dashboard(df)
+with tab4:
+    # st.write(f"Opción 2: {file1}")
+    df = load_new_format(file)
+    generate_3d_dashboard(df)
 
 # Add text below the charts
 st.markdown(
