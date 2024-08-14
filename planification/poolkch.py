@@ -78,9 +78,12 @@ min_date = df["changeout_date"].min().date()
 max_date = df["arrival_date"].max().date()
 current_date = datetime.now().date()
 # Filter and sort data
-filtered_df = df[df["arrival_date"].dt.date > current_date].sort_values("arrival_date")
+filtered_df = df[df["arrival_date"].dt.date > current_date].sort_values(
+    ["pool_slot", "arrival_date"], ascending=[True, False]
+)
 # Use drop_duplicates to keep only the first occurrence for each pool_number
 filtered_df = filtered_df.drop_duplicates(subset="pool_slot", keep="first")
+filtered_df = filtered_df.sort_values("arrival_date").reset_index(drop=True)
 # Display upcoming arrivals using columns and metrics
 st.subheader("Próximas llegadas de componente")
 if not filtered_df.empty:
@@ -112,8 +115,8 @@ else:
 def plot_pool_timeline(df):
     # Create the Gantt chart
     pool_numbers = sorted(df["pool_slot"].unique())
-    grid_positions = [i + 0.5 for i in range(len(pool_numbers))] + [len(pool_numbers) + 0.5]
-
+    grid_positions = [-0.5] + [i + 0.5 for i in range(len(pool_numbers))]
+    df = df.drop(columns=["subcomponent_priority"])
     fig = px.timeline(
         df,
         x_start="changeout_date",
@@ -127,22 +130,50 @@ def plot_pool_timeline(df):
     )
     fig.for_each_trace(lambda t: t.update(name={"I": "Imprevisto", "P": "Planificado", "U": "Pendiente"}[t.name]))
 
-    # Add a vertical line for the current week
-    current_date = datetime.now().date()
-    fig.add_vline(x=current_date, line_width=2, line_dash="dash", line_color="black")
-    # Add an annotation for the current week line
-    fig.add_annotation(
-        x=current_date,
-        y=1,  # This positions the text at the top of the plot
-        text="Hoy",
-        showarrow=True,
-        arrowhead=2,
-        arrowsize=1,
-        arrowwidth=2,
-        arrowcolor="black",
-        ax=50,  # Offset the arrow in x direction
-        ay=-30,  # Offset the arrow in y direction
-    )
+    ###
+    # Add rectangles for overlapping periods
+    df = df.sort_values(["pool_slot", "changeout_date"])
+    for i in range(len(df) - 1):
+        current_row = df.iloc[i]
+        next_row = df.iloc[i + 1]
+        if (
+            current_row["pool_slot"] == next_row["pool_slot"]
+            and current_row["arrival_date"] > next_row["changeout_date"]
+        ):
+
+            overlap_start = next_row["changeout_date"]
+            overlap_end = min(current_row["arrival_date"], next_row["arrival_date"])
+            # Calculate the overlap duration
+            # Calculate the overlap duration
+            overlap_duration = overlap_end - overlap_start
+
+            # Calculate the midpoint of the overlap period
+            overlap_midpoint = overlap_start + (overlap_end - overlap_start) / 2
+            fig.add_shape(
+                type="rect",
+                x0=overlap_start,
+                x1=overlap_end,
+                y0=current_row["pool_slot"] - 1 - 0.4,
+                y1=current_row["pool_slot"] - 1 + 0.4,
+                fillcolor="yellow",
+                opacity=0.5,
+                layer="above",
+                line_width=0,
+            )
+            # Add text to show the overlap duration
+            fig.add_annotation(
+                x=overlap_midpoint,
+                y=current_row["pool_slot"] - 1,  # Position the text above the yellow rectangle
+                text=f"{overlap_duration.days} days",
+                showarrow=False,
+                font=dict(size=15, color="black"),
+                bgcolor="white",
+                opacity=0.8,
+                bordercolor="black",
+                borderwidth=1,
+            )
+    # st.dataframe(df)
+    ###
 
     fig.update_layout(
         xaxis=dict(
@@ -195,13 +226,34 @@ def plot_pool_timeline(df):
     for i, row in df.iterrows():
         fig.add_annotation(
             x=row["changeout_date"] + (row["arrival_date"] - row["changeout_date"]) / 2,
-            y=row["pool_slot"],
+            y=row["pool_slot"] - 1,
             text=str(row["equipo"]),
             showarrow=False,
-            font=dict(size=10, color="black"),
+            font=dict(size=15, color="black"),
             bgcolor="white",
             opacity=0.8,
         )
+
+    # Para evitar que aparezcan en grande
+    fig.update_yaxes(type="category", categoryorder="array", categoryarray=pool_numbers)
+
+    # Add a vertical line for the current week
+    current_date = datetime.now().date()
+    fig.add_vline(x=current_date, line_width=2, line_dash="dash", line_color="black")
+    # Add an annotation for the current week line
+    fig.add_annotation(
+        x=current_date,
+        y=-0.1,  # This positions the text at the top of the plot
+        text="Hoy",
+        font=dict(size=20, color="black"),
+        showarrow=True,
+        arrowhead=2,
+        arrowsize=1,
+        arrowwidth=2,
+        arrowcolor="black",
+        ax=50,  # Offset the arrow in x direction
+        ay=-30,  # Offset the arrow in y direction
+    )
 
     # Update layout for cleanliness
     fig.update_layout(
@@ -257,4 +309,7 @@ d = st.date_input(
 
 fig = plot_pool_timeline(df.loc[df["arrival_date"].dt.date.between(d[0], d[1])])
 
+
 st.plotly_chart(fig, use_container_width=True)
+
+# st.dataframe(df.loc[df["component_code"] == "mp"])

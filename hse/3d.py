@@ -57,10 +57,11 @@ with tab2:
     generate_3d_dashboard(df)
 with tab3:
     # st.write(f"Opción 1: {file}")
-    file = "FAENAS/ESCONDIDA/y=2023/m=09/MEL_Septiembre_2023/TK848/HSEC/y=2024/m=07/KOMATSU CHILE S A_Detalle Cumplimiento Empresa Programa FLP_Julio 2024 Rev 3D Derek.xlsx"
+    file = "FAENAS/ESCONDIDA/y=2023/m=09/MEL_Septiembre_2023/TK848/HSEC/y=2024/m=07/KOMATSU CHILE S A_Detalle Cumplimiento Empresa Programa FLP_Julio 2024.xlsx"
     df = load_new_format(file)
     generate_3d_dashboard(df)
 with tab4:
+    # "FAENAS/ESCONDIDA/y=2023/m=09/MEL_Septiembre_2023/TK848/HSEC/y=2024/m=07/KOMATSU CHILE S A_Detalle Cumplimiento Empresa Programa FLP_Julio 2024 Rev 3D Derek.xlsx"
     # st.write(f"Opción 2: {file1}")
     df = load_new_format(file)
     generate_3d_dashboard(df)

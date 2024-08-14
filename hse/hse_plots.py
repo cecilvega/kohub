@@ -127,7 +127,7 @@ def generate_3d_dashboard(df: pd.DataFrame):
             go.Pie(labels=["", title], values=[100 - value, value], hole=0.7, marker_colors=["#d1d4d3", color])
         )
         fig.update_layout(
-            annotations=[dict(text=f"{value}%", x=0.5, y=0.5, font_size=20, showarrow=False)],
+            annotations=[dict(text=f"{round(value,0)}%", x=0.5, y=0.5, font_size=20, showarrow=False)],
             showlegend=False,
             width=300,
             height=300,

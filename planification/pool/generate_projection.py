@@ -160,8 +160,8 @@ def generate_pool_projection(
         .drop(columns="_merge")
         .assign(pool_changeout_type=lambda x: x["pool_changeout_type"].fillna("P"))
     )
-    df = allocate_components(missing_cc_df, pool_slots_df)
-    df = pd.concat([pool_slots_df, df]).reset_index(drop=True)
+    df = allocate_components(missing_cc_df, pool_slots_df).reset_index(drop=True)
+    # df = pd.concat([pool_slots_df, df]).reset_index(drop=True)
 
     df[["changeout_date", "arrival_date"]] = df[["changeout_date", "arrival_date"]].apply(
         lambda x: pd.to_datetime(x, format="%Y-%m-%d")

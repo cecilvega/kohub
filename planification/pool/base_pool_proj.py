@@ -131,26 +131,28 @@ def data_fixes(df):
         "changeout_week",
     ] = "2024-W7"
 
+    ###
+
     df = pd.concat(
         [
             df,
             pd.DataFrame.from_dict(
                 {
-                    "pool_slot": [1, 3, 7],
-                    "component_code": ["mp", "mp", "mp"],
-                    "equipo": ["855", "852", "320"],
-                    "changeout_week": ["2024-W24", "2024-W18", "2024-W31"],
-                    "component_serial": ["#EE14010714", "???", "???"],
-                    "arrival_week": ["2024-W31", "2024-W52", "2024-W40"],
-                    "pool_changeout_type": ["I", "U", "I"],
+                    "pool_slot": [1, 3, 7, 4],
+                    "component_code": ["mp", "mp", "mp", "mp"],
+                    "equipo": ["855", "852", "320", "882"],
+                    "changeout_week": ["2024-W24", "2024-W18", "2024-W31", "2024-W33"],
+                    "component_serial": ["#EE14010714", "???", "#217596-3", "#EE11100947"],
+                    "arrival_week": ["2024-W51", "2024-W51", "2024-W40", "2024-W46"],
+                    "pool_changeout_type": ["U", "U", "I", "I"],
                 }
             ).assign(
                 changeout_date=lambda x: x["changeout_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w")),
-                arrival_date=lambda x: x["arrival_week"].map(lambda x: datetime.strptime(x + "-6", "%Y-W%W-%w")),
+                # arrival_date=lambda x: x["arrival_week"].map(lambda x: datetime.strptime(x + "-6", "%Y-W%W-%w")),
             ),
         ]
     )
-
+    df = df.assign(arrival_date=df["arrival_week"].map(lambda x: datetime.strptime(x + "-6", "%Y-W%W-%w")))
     return df
 
 
