@@ -103,21 +103,21 @@ logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
 settings = st.Page("settings.py", title="Settings", icon=":material/settings:")
 
 bhp_home = st.Page(
-    "bhp/home.py",
+    "pages/bhp/home.py",
     title="Home",
     icon=":material/healing:",
     default=(role == "BHP"),
 )
 komatsu_home = st.Page(
-    "komatsu/inicio.py",
+    "pages/komatsu/inicio.py",
     title="Inicio",
     icon=":material/person_add:",
     default=(role == "Komatsu"),
 )
 
 
-pool_proyection = st.Page("planification/poolkch.py", title="Pool KCH")  # , icon=":material/dashboard:"
-hse_3d = st.Page("hse/3d.py", title="3D")  # , icon=":material/dashboard:"
+pool_proyection = st.Page("pages/planification/poolkch.py", title="Pool KCH")  # , icon=":material/dashboard:"
+hse_3d = st.Page("pages/hse/3d.py", title="3D")  # , icon=":material/dashboard:"
 
 # settings
 account_pages = [logout_page]

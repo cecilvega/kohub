@@ -4,9 +4,28 @@ import re
 from datetime import datetime
 from pathlib import Path
 import os
-from io import BytesIO
+from io import BytesIO, StringIO
 from azure.storage.blob import BlobServiceClient
-from planification.pool.utils import extract_info, idx_to_pool_slot, get_weeks_and_comments, get_end_week
+from kverse.assets.pool.utils import extract_info, idx_to_pool_slot, get_weeks_and_comments, get_end_week
+
+
+def read_base_pool_proj():
+    blob_service_client = BlobServiceClient(
+        account_url=os.environ["AZURE_ACCOUNT_URL"],
+        credential=os.environ["AZURE_SAS_TOKEN"],
+    )
+    blob_client = blob_service_client.get_blob_client(
+        container=os.environ["AZURE_CONTAINER_NAME"],
+        blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/pool_proj.csv",
+    )
+    blob_data = blob_client.download_blob().readall()
+    blob_data = StringIO(blob_data.decode("latin-1"))
+    df = pd.read_csv(blob_data)
+    df = df.assign(
+        equipo=df["equipo"].astype(str),
+        arrival_date=lambda x: x["arrival_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w")),
+    )
+    return df
 
 
 def get_weeks_and_comments(row, sheet):
@@ -138,13 +157,34 @@ def data_fixes(df):
             df,
             pd.DataFrame.from_dict(
                 {
-                    "pool_slot": [1, 3, 7, 4],
-                    "component_code": ["mp", "mp", "mp", "mp"],
-                    "equipo": ["855", "852", "320", "882"],
-                    "changeout_week": ["2024-W24", "2024-W18", "2024-W31", "2024-W33"],
-                    "component_serial": ["#EE14010714", "???", "#217596-3", "#EE11100947"],
-                    "arrival_week": ["2024-W51", "2024-W51", "2024-W40", "2024-W46"],
-                    "pool_changeout_type": ["U", "U", "I", "I"],
+                    "pool_slot": [
+                        3
+                        # , 7, 4
+                    ],
+                    "component_code": [
+                        "mp"
+                        # , "mp", "mp"
+                    ],
+                    "equipo": [
+                        "852"
+                        # , "320", "882"
+                    ],
+                    "changeout_week": [
+                        "2024-W18"
+                        # , "2024-W31", "2024-W32"
+                    ],
+                    "component_serial": [
+                        "???"
+                        # , "#217596-3", "#EE11100947"
+                    ],
+                    "arrival_week": [
+                        "2024-W51"
+                        # , "2024-W40", "2024-W46"
+                    ],
+                    "pool_changeout_type": [
+                        "E"
+                        # , "I", "I"
+                    ],
                 }
             ).assign(
                 changeout_date=lambda x: x["changeout_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w")),
@@ -152,11 +192,12 @@ def data_fixes(df):
             ),
         ]
     )
+
     df = df.assign(arrival_date=df["arrival_week"].map(lambda x: datetime.strptime(x + "-6", "%Y-W%W-%w")))
     return df
 
 
-def read_base_pool_proj():
+def read_base_pool_proj_deprecated():
     blob_service_client = BlobServiceClient(
         account_url=os.environ["AZURE_ACCOUNT_URL"],
         credential=os.environ["AZURE_SAS_TOKEN"],

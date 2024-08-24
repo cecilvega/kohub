@@ -1,18 +1,10 @@
-import pandas as pd
 import streamlit as st
-from pathlib import Path
 from common import *
-from utils import *
 import os
-import sys
-import plotly.express as px
-from plotly import graph_objects as go
-import numpy as np
 import calendar
 from azure.storage.blob import BlobServiceClient
 from datetime import datetime
-from io import BytesIO
-from hse.hse_plots import generate_3d_dashboard, load_new_format, load_old_format
+from pages.hse.hse_plots import generate_3d_dashboard, load_new_format, load_old_format
 
 
 styler()

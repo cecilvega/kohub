@@ -66,8 +66,8 @@ def read_pool_component_arrivals():
     df_melted["n_components"] = df_melted["n_components"].astype(int)
 
     # Apply the expand_rows function and reset the index
-    df_melted["pool_slot"] = df_melted.apply(lambda row: list(range(row["n_components"])), axis=1)
-    df = df_melted.explode("pool_slot")
+    df_melted["arrived_component_idx"] = df_melted.apply(lambda row: list(range(row["n_components"])), axis=1)
+    df = df_melted.explode("arrived_component_idx")
 
     df = df.sort_values(["componente", "arrival_week"]).reset_index(drop=True)
     df = df.assign(
