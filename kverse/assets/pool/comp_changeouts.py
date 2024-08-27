@@ -28,6 +28,7 @@ def read_cc():
         "FECHA DE CAMBIO": "changeout_date",
         "HORA CC": "component_hours",
         "TBO": "tbo_hours",
+        "TIPO CAMBIO POOL": "pool_changeout_type",
     }
     df = (
         df[list(columns_map.keys())]
@@ -35,10 +36,6 @@ def read_cc():
         .rename(columns=columns_map)
         .assign(
             equipo=lambda x: x["equipo"].str.extract(r"(\d+)"),
-            # changeout_week=lambda x: x["FECHA DE CAMBIO"]
-            # .dt.year.astype(int)
-            # .astype(str)
-            # .str.cat(x["changeout_week"].str.zfill(2), sep="-W"),
             component_code=lambda x: x["componente"].map(
                 lambda x: {
                     "Blower": "bp",
@@ -59,6 +56,5 @@ def read_cc():
         .dt.year.astype(str)
         .str.cat(x["changeout_week"].astype(str), sep="-W")
     )
-    df = df.assign(pool_changeout_type=None)
 
     return df

@@ -34,7 +34,7 @@ def read_pool_component_arrivals():
     blob_data = BytesIO(blob_data.readall())
     # Read the Excel file
     wb = openpyxl.load_workbook(blob_data, data_only=False)
-    sheet = wb.active
+    sheet = wb["Pool 960E MEL"]
 
     # Create a DataFrame from the Excel data
     data = []
@@ -66,8 +66,8 @@ def read_pool_component_arrivals():
     df_melted["n_components"] = df_melted["n_components"].astype(int)
 
     # Apply the expand_rows function and reset the index
-    df_melted["pool_slot"] = df_melted.apply(lambda row: list(range(row["n_components"])), axis=1)
-    df = df_melted.explode("pool_slot")
+    df_melted["arrived_component_idx"] = df_melted.apply(lambda row: list(range(row["n_components"])), axis=1)
+    df = df_melted.explode("arrived_component_idx")
 
     df = df.sort_values(["componente", "arrival_week"]).reset_index(drop=True)
     df = df.assign(
