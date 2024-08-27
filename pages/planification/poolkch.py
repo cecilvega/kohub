@@ -42,10 +42,9 @@ st.markdown(
 @st.cache_data(ttl=timedelta(hours=1))
 def fetch_and_clean_data():
     cc_df = read_cc()
-
     pool_proj_df = read_base_pool_proj()
-
-    allocation = ComponentAllocation(cc_df, pool_proj_df)
+    arrivals_df = read_pool_component_arrivals()
+    allocation = ComponentAllocation(cc_df, pool_proj_df, arrivals_df)
     df = allocation.generate_pool_projection()
     return df
 

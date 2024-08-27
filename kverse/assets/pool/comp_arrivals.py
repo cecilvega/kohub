@@ -34,7 +34,7 @@ def read_pool_component_arrivals():
     blob_data = BytesIO(blob_data.readall())
     # Read the Excel file
     wb = openpyxl.load_workbook(blob_data, data_only=False)
-    sheet = wb.active
+    sheet = wb["Pool 960E MEL"]
 
     # Create a DataFrame from the Excel data
     data = []

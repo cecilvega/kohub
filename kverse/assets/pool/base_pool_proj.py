@@ -7,6 +7,7 @@ import os
 from io import BytesIO, StringIO
 from azure.storage.blob import BlobServiceClient
 from kverse.assets.pool.utils import extract_info, idx_to_pool_slot, get_weeks_and_comments, get_end_week
+import numpy as np
 
 
 def read_base_pool_proj():
@@ -23,7 +24,12 @@ def read_base_pool_proj():
     df = pd.read_csv(blob_data)
     df = df.assign(
         equipo=df["equipo"].astype(str),
-        arrival_date=lambda x: x["arrival_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w")),
+        # arrival_date=lambda x: np.where(
+        #     x["arrival_week"].notnull(), x["arrival_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
+        # ),
+    )
+    df.loc[df["arrival_week"].notnull(), "arrival_date"] = df.loc[df["arrival_week"].notnull()]["arrival_week"].map(
+        lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w")
     )
     return df
 

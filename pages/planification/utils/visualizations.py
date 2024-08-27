@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
+import numpy as np
 
 
 def validate_input(df):
@@ -26,7 +27,8 @@ def validate_input(df):
 def prepare_data(df):
     """Prepare the data for plotting."""
     df = df.sort_values(["pool_slot", "changeout_date"])
-    df = df.drop(columns=["subcomponent_priority"])
+
+    # df = df.drop(columns=["subcomponent_priority"])
     return df
 
 
@@ -183,6 +185,7 @@ def plot_pool_timeline(df):
 
     validate_input(df)
     df = prepare_data(df)
+
     fig = create_base_chart(df)
     customize_layout(fig, df)
     add_annotations(fig, df)
