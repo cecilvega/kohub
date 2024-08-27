@@ -81,11 +81,13 @@ class ComponentAllocation:
         cc_df = cc_df[cc_df["component_code"].isin([c.code for c in self.COMPONENT_CODES])]
         pool_proj_df = pool_proj_df[pool_proj_df["component_code"].isin([c.code for c in self.COMPONENT_CODES])]
 
-        # debug_components = ["mp", "cd"]
+        debug_components = ["mp", "cd"]
 
-        self.cc_df = cc_df.reset_index(drop=True)
-        self.pool_proj_df = pool_proj_df.reset_index(drop=True)
-        self.arrivals_df = arrivals_df.reset_index(drop=True)
+        self.cc_df = cc_df.loc[cc_df["component_code"].isin(debug_components)].reset_index(drop=True)
+        self.pool_proj_df = pool_proj_df.loc[pool_proj_df["component_code"].isin(debug_components)].reset_index(
+            drop=True
+        )
+        self.arrivals_df = arrivals_df.loc[arrivals_df["component_code"].isin(debug_components)].reset_index(drop=True)
         self.arrivals_df = self.get_next_arrivals()
         self.missing_cc_df = None
         self.pool_slots_df = None
@@ -230,13 +232,13 @@ class ComponentAllocation:
         """
         cc_df = self.missing_cc_df.sort_values(["component_code", "changeout_date"]).reset_index(drop=True)
         df = self.pool_slots_df.copy()
-        i = 0
+        # i = 0
         for component in cc_df["component_code"].unique():
             for _, changeout in cc_df.loc[cc_df["component_code"] == component].iterrows():
 
-                if i == 9:
-                    return df
-                i = i + 1
+                # if i == 9:
+                #     return df
+                # i = i + 1
                 print(changeout)
                 available_slots_df = find_available_pool_slot(df, changeout)
                 # print(available_slots_df)
