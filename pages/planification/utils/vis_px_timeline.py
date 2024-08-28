@@ -7,29 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 import numpy as np
-
-
-def validate_input(df):
-    """Validate the input DataFrame."""
-    required_columns = [
-        "pool_slot",
-        "changeout_date",
-        "arrival_date",
-        "pool_changeout_type",
-        "equipo",
-        "component_serial",
-    ]
-    missing_columns = [col for col in required_columns if col not in df.columns]
-    if missing_columns:
-        raise ValueError(f"Missing required columns: {', '.join(missing_columns)}")
-
-
-def prepare_data(df):
-    """Prepare the data for plotting."""
-    df = df.sort_values(["pool_slot", "changeout_date"])
-
-    # df = df.drop(columns=["subcomponent_priority"])
-    return df
+from pages.planification.utils.vis_timeline import validate_input, prepare_data
 
 
 def create_base_chart(df):
@@ -167,7 +145,7 @@ def add_invisible_trace(fig, df):
     )
 
 
-def plot_pool_timeline(df):
+def plot_pool_px_timeline(df):
     """
     Create a Gantt chart of pool timeline using the provided DataFrame.
 

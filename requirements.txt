@@ -5,3 +5,4 @@ streamlit
 azure-storage-blob
 openpyxl
 matplotlib
+streamlit-vis-timeline

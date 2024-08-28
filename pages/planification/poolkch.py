@@ -10,7 +10,8 @@ from plotly import graph_objects as go
 from azure.storage.blob import BlobServiceClient
 from io import BytesIO
 from kverse.assets.pool import *
-from pages.planification.utils.visualizations import plot_pool_timeline
+from pages.planification.utils.vis_px_timeline import plot_pool_px_timeline
+from pages.planification.utils.vis_timeline import plot_pool_timeline, plot_component_arrival_timeline
 from datetime import datetime, date, timedelta
 
 
@@ -67,7 +68,7 @@ componente = st.selectbox(
     ),
     index=6,
 )
-
+# timeline3 = plot_component_arrival_timeline(df)
 df = df.loc[df["componente"] == componente].reset_index(drop=True)
 # df = df.assign(pool_slot=df["pool_slot"].astype(str))
 
@@ -204,8 +205,12 @@ d = st.date_input(
     max_date,
     format="MM.DD.YYYY",
 )
+# timeline2 = plot_pool_timeline(df.loc[df["arrival_date"].dt.date.between(d[0], d[1])])
 
-fig = plot_pool_timeline(df.loc[df["arrival_date"].dt.date.between(d[0], d[1])])
+# st.subheader("Selected item")
+# st.write(timeline2)
+
+fig = plot_pool_px_timeline(df.loc[df["arrival_date"].dt.date.between(d[0], d[1])])
 
 
 st.plotly_chart(fig, use_container_width=True)
