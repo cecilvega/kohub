@@ -122,7 +122,7 @@ def plot_component_arrival_timeline(df):
     """
 
     # Get the last arrival for each unique combination of component_code and pool_slot
-    df_last_arrivals = df.sort_values("arrival_date").groupby(["component_code", "pool_slot"]).last().reset_index()
+    df_last_arrivals = df.sort_values("arrival_date").groupby(["component", "pool_slot"]).last().reset_index()
 
     # Create items for the timeline
     items = []
@@ -131,15 +131,14 @@ def plot_component_arrival_timeline(df):
             "id": str(len(items) + 1),
             "content": f"Pool {row['pool_slot']}",
             "start": row["arrival_date"].strftime("%Y-%m-%d"),
-            "group": str(row["component_code"]),
+            "group": str(row["component"]),
             "style": "background-color: #00a7e1;",  # Blue color for all arrivals
         }
         items.append(item)
 
     # Create groups for the timeline
     groups = [
-        {"id": str(code), "content": f"Component {code}"}
-        for code in sorted(df_last_arrivals["component_code"].unique())
+        {"id": str(code), "content": f"Component {code}"} for code in sorted(df_last_arrivals["component"].unique())
     ]
 
     # Set up options for the timeline

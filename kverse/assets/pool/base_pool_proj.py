@@ -11,16 +11,17 @@ import numpy as np
 
 
 def read_base_pool_proj():
-    blob_service_client = BlobServiceClient(
-        account_url=os.environ["AZURE_ACCOUNT_URL"],
-        credential=os.environ["AZURE_SAS_TOKEN"],
-    )
-    blob_client = blob_service_client.get_blob_client(
-        container=os.environ["AZURE_CONTAINER_NAME"],
-        blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/pool_proj.csv",
-    )
-    blob_data = blob_client.download_blob().readall()
-    blob_data = StringIO(blob_data.decode("latin-1"))
+    # blob_service_client = BlobServiceClient(
+    #     account_url=os.environ["AZURE_ACCOUNT_URL"],
+    #     credential=os.environ["AZURE_SAS_TOKEN"],
+    # )
+    # blob_client = blob_service_client.get_blob_client(
+    #     container=os.environ["AZURE_CONTAINER_NAME"],
+    #     blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/pool_proj.csv",
+    # )
+    # blob_data = blob_client.download_blob().readall()
+    # blob_data = StringIO(blob_data.decode("latin-1"))
+    blob_data = "DATA/pool_proj.csv"
     df = pd.read_csv(blob_data)
     df = df.assign(
         equipo=df["equipo"].astype(str),
@@ -30,6 +31,21 @@ def read_base_pool_proj():
     )
     df.loc[df["arrival_week"].notnull(), "arrival_date"] = df.loc[df["arrival_week"].notnull()]["arrival_week"].map(
         lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w")
+    )
+    df = df.assign(
+        component=lambda x: x["component_code"]
+        .str.strip(" ")
+        .map(
+            lambda x: {
+                "bp": "blower",
+                "cd": "cilindro_direccion",
+                "st": "suspension_trasera",
+                "cms": "conjunto_masa_suspension",
+                "mt": "motor_traccion",
+                "cl": "cilindro_direccion",
+                "mp": "modulo_potencia",
+            }[x]
+        ),
     )
     return df
 
@@ -289,4 +305,5 @@ def read_base_pool_proj_deprecated():
 
     df = pd.concat(frames)
     df = data_fixes(df)
+
     return df

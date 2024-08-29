@@ -77,7 +77,7 @@ def login():
     st.text_input("Username", key="username")
     st.text_input("Password", type="password", key="password")
     # For debugging purposes skip login
-    if os.environ.get("USERNAME") == "cecilvega":
+    if os.environ.get("USERNAME") in ["cecilvega", "U1309565"]:
         st.session_state.logged_in = True
         st.session_state.role = "Komatsu"
         st.rerun()
@@ -116,13 +116,14 @@ komatsu_home = st.Page(
 )
 
 
-pool_proyection = st.Page("pages/planification/poolkch.py", title="Pool KCH")  # , icon=":material/dashboard:"
+pool_projection = st.Page("pages/planification/poolkch.py", title="Pool KCH")  # , icon=":material/dashboard:"
+component_changeouts = st.Page("pages/komatsu/component_changeouts.py", title="Cambios de Componente")
 hse_3d = st.Page("pages/hse/3d.py", title="3D")  # , icon=":material/dashboard:"
 
 # settings
 account_pages = [logout_page]
-bhp_pages = [bhp_home, pool_proyection]
-komatsu_pages = [komatsu_home, hse_3d]
+bhp_pages = [bhp_home, pool_projection]
+komatsu_pages = [komatsu_home, component_changeouts, hse_3d]
 
 st.title("MEL")
 st.logo(

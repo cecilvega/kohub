@@ -22,16 +22,17 @@ def get_week_end_date(week_str):
 
 def read_pool_component_arrivals():
 
-    blob_service_client = BlobServiceClient(
-        account_url=os.environ["AZURE_ACCOUNT_URL"],
-        credential=os.environ["AZURE_SAS_TOKEN"],
-    )
-    blob_client = blob_service_client.get_blob_client(
-        container=os.environ["AZURE_CONTAINER_NAME"],
-        blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/Pool Componente MEL.xlsx",
-    )
-    blob_data = blob_client.download_blob()
-    blob_data = BytesIO(blob_data.readall())
+    # blob_service_client = BlobServiceClient(
+    #     account_url=os.environ["AZURE_ACCOUNT_URL"],
+    #     credential=os.environ["AZURE_SAS_TOKEN"],
+    # )
+    # blob_client = blob_service_client.get_blob_client(
+    #     container=os.environ["AZURE_CONTAINER_NAME"],
+    #     blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/Pool Componente MEL.xlsx",
+    # )
+    # blob_data = blob_client.download_blob()
+    # blob_data = BytesIO(blob_data.readall())
+    blob_data = "DATA/Pool Componente MEL.xlsx"
     # Read the Excel file
     wb = openpyxl.load_workbook(blob_data, data_only=False)
     sheet = wb["Pool 960E MEL"]
@@ -71,17 +72,17 @@ def read_pool_component_arrivals():
 
     df = df.sort_values(["componente", "arrival_week"]).reset_index(drop=True)
     df = df.assign(
-        component_code=lambda x: x["componente"]
+        component=lambda x: x["componente"]
         .str.strip(" ")
         .map(
             lambda x: {
-                "Blower Parrilla": "bp",
-                "Cilindro Dirección": "cd",
-                "Suspensión Trasera": "st",
-                "Suspensión Delantera": "cms",
-                "Motor Tracción": "mt",
-                "Cilindro Levante": "cl",
-                "Modulo Potencia": "mp",
+                "Blower Parrilla": "blower",
+                "Cilindro Dirección": "cilindro_direccion",
+                "Suspensión Trasera": "suspension_trasera",
+                "Suspensión Delantera": "conjunto_masa_suspension",
+                "Motor Tracción": "motor_traccion",
+                "Cilindro Levante": "cilindro_direccion",
+                "Modulo Potencia": "modulo_potencia",
             }[x]
         ),
     ).drop(columns=["componente"])
