@@ -21,18 +21,20 @@ def get_week_end_date(week_str):
 
 
 def read_pool_component_arrivals():
+    if os.environ.get("USERNAME") in ["cecilvega", "U1309565"]:
+        blob_data = "DATA/Pool Componente MEL.xlsx"
+    else:
+        blob_service_client = BlobServiceClient(
+            account_url=os.environ["AZURE_ACCOUNT_URL"],
+            credential=os.environ["AZURE_SAS_TOKEN"],
+        )
+        blob_client = blob_service_client.get_blob_client(
+            container=os.environ["AZURE_CONTAINER_NAME"],
+            blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/Pool Componente MEL.xlsx",
+        )
+        blob_data = blob_client.download_blob()
+        blob_data = BytesIO(blob_data.readall())
 
-    # blob_service_client = BlobServiceClient(
-    #     account_url=os.environ["AZURE_ACCOUNT_URL"],
-    #     credential=os.environ["AZURE_SAS_TOKEN"],
-    # )
-    # blob_client = blob_service_client.get_blob_client(
-    #     container=os.environ["AZURE_CONTAINER_NAME"],
-    #     blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/Pool Componente MEL.xlsx",
-    # )
-    # blob_data = blob_client.download_blob()
-    # blob_data = BytesIO(blob_data.readall())
-    blob_data = "DATA/Pool Componente MEL.xlsx"
     # Read the Excel file
     wb = openpyxl.load_workbook(blob_data, data_only=False)
     sheet = wb["Pool 960E MEL"]

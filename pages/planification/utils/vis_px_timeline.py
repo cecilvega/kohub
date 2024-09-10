@@ -1,17 +1,20 @@
 import plotly.express as px
 from datetime import datetime
-
-
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
 import numpy as np
 from pages.planification.utils.vis_timeline import validate_input, prepare_data
 
 
 def create_base_chart(df):
-    """Create the base Gantt chart."""
+    """Create the base Gantt chart with custom hover template."""
+    hover_template = (
+        "<b>Component Serial:</b> %{customdata[4]}<br>"
+        "<b>Changeout Date:</b> %{x}<br>"
+        "<b>Arrival Date:</b> %{customdata[1]}<br>"
+        "<b>Days in Repair:</b> %{customdata[5]}"
+    )
+
     fig = px.timeline(
         df,
         x_start="changeout_date",
@@ -19,20 +22,30 @@ def create_base_chart(df):
         y="pool_slot",
         color="pool_changeout_type",
         color_discrete_map={"I": "#ff0000", "P": "#2bb673", "E": "#a5abaf", "R": "#f37021", "A": "#00a7e1"},
-        hover_data=["pool_slot", "changeout_date", "arrival_date", "equipo", "component_serial"],
+        custom_data=["pool_slot", "arrival_date", "equipo", "component_serial", "component_serial", "days_in_repair"],
         height=500,
-        title="Actual Changes Executed",
+        # title="Proyección en función de cambios reales",
     )
+
+    fig.update_traces(hovertemplate=hover_template)
+
     fig.for_each_trace(
         lambda t: t.update(
-            name={"I": "Imprevisto", "P": "Planificando", "E": "Esperando", "R": "Reparado", "A": "Adelantado"}[t.name]
+            name={
+                "I": "Imprevisto",
+                "P": "Planificando",
+                "E": "Esperando",
+                "R": "Componente a piso",
+                "A": "Adelantado",
+            }[t.name]
         )
     )
     return fig
 
 
 def customize_layout(fig, df):
-    """Customize the chart layout."""
+    """Customize the chart layout with larger fonts and Komatsu blue."""
+    komatsu_blue = "#140a9a"  # Komatsu Blue (PANTONE 072 C)
     pool_numbers = sorted(df["pool_slot"].unique())
     grid_positions = [-0.5] + [i + 0.5 for i in range(len(pool_numbers))]
 
@@ -47,6 +60,9 @@ def customize_layout(fig, df):
             side="bottom",
             dtick=7 * 24 * 60 * 60 * 1000,
             gridwidth=2,
+            # title="Fecha de Cambio o Entrega componente",
+            tickfont=dict(size=16, color="black"),
+            # title_font=dict(size=20, color="black"),  # color=komatsu_blue
         ),
         xaxis2=dict(
             tickformat="%b-%y",
@@ -55,22 +71,34 @@ def customize_layout(fig, df):
             overlaying="x",
             side="bottom",
             showgrid=False,
+            tickfont=dict(size=14),
         ),
         yaxis=dict(
             autorange="reversed",
-            title="Pool Assignment",
+            title="Componentes del pool",  # Updated y-axis title
+            title_font=dict(size=20, color="black"),
             automargin=True,
             showticklabels=True,
             tickmode="array",
             tickvals=df["pool_slot"].unique(),
-            ticktext=df["pool_slot"].unique(),
+            ticktext=[f"{slot}" for slot in df["pool_slot"].unique()],  # Updated y-axis labels
             showgrid=False,
             zeroline=False,
+            tickfont=dict(size=22, color="black"),
         ),
         plot_bgcolor="white",
         margin=dict(l=10, r=10, t=50, b=50),
         height=500,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, title="Change Type"),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            title="Estado asignación pool",
+            font=dict(size=18),
+            title_font=dict(size=22, color="black"),  # , color=komatsu_blue
+        ),
     )
 
     for y in grid_positions:
@@ -80,7 +108,7 @@ def customize_layout(fig, df):
             x1=df["arrival_date"].max(),
             y0=y,
             y1=y,
-            line=dict(color="black", width=1.5),
+            line=dict(color=komatsu_blue, width=1.5),
             layer="below",
         )
 
@@ -116,7 +144,7 @@ def add_annotations(fig, df):
     fig.add_annotation(
         x=current_date,
         y=-0.1,
-        text="Today",
+        text="Hoy",
         font=dict(size=20, color="black"),
         showarrow=True,
         arrowhead=2,
@@ -163,6 +191,9 @@ def plot_pool_px_timeline(df):
 
     validate_input(df)
     df = prepare_data(df)
+
+    # Calculate days in repair
+    df["days_in_repair"] = (df["arrival_date"] - df["changeout_date"]).dt.days
 
     fig = create_base_chart(df)
     customize_layout(fig, df)

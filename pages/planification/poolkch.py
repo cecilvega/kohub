@@ -19,6 +19,8 @@ from datetime import datetime, date, timedelta
 # st.set_page_config(page_title="DevOps", page_icon=":bar_chart:", layout="wide")
 styler()
 
+current_date = datetime.now().date()
+
 available_components = [
     "blower",
     "cilindro_direccion",
@@ -28,27 +30,6 @@ available_components = [
     "cilindro_levante",
     "modulo_potencia",
 ]
-
-
-st.markdown(
-    """
-## Estado de los Componentes
-
-Actualización 28 Agosto y 29 Agosto vamos a estar haciendo muchas modificaciones.
-
-| Componente | Estado |
-|------------|--------|
-| Blower | ✅ Próximamente |
-| Cilindro Dirección | ✅ Próximamente |
-| Suspensión Trasera | ✅ Próximamente |
-| CMSD | ✅ Próximamente |
-| Motor Tracción | ✅ Próximamente |
-| Cilindro Levante | ✅ Próximamente |
-| Módulo Potencia | ✅ Funcionando |
----
-
-"""
-)
 
 
 @st.cache_data(ttl=timedelta(hours=1))
@@ -66,91 +47,95 @@ df = fetch_and_clean_data()
 # Drop missing components
 df = df.dropna(subset=["arrival_date"]).reset_index(drop=True)
 
-component = st.selectbox(
+options_display = {
+    "blower": "Blower",
+    "cilindro_direccion": "Cilindro de Dirección",
+    "suspension_trasera": "Suspensión Trasera",
+    "conjunto_masa_suspension": "Conjunto Masa Suspensión",
+    "motor_traccion": "Motor de Tracción",
+    "cilindro_levante": "Cilindro de Levante",
+    "modulo_potencia": "Módulo de Potencia",
+}
+
+# Create the selectbox using the dictionary
+component = st.sidebar.selectbox(
     "Selección de Componente",
-    options=(
-        "blower",
-        "cilindro_direccion",
-        "suspension_trasera",
-        "conjunto_masa_suspension",
-        "motor_traccion",
-        "cilindro_levante",
-        "modulo_potencia",
-    ),
+    options=list(options_display.keys()),
+    format_func=lambda x: options_display[x],
     index=6,
 )
 
-tab1, tab2 = st.tabs(["📈 Forma 1", "🗃 Forma 2"])
 
-with tab2:
+st.title("Proyección de entrega")
 
-    timeline3 = plot_component_arrival_timeline(df)
-    # timeline2 = plot_pool_timeline(df.loc[df["arrival_date"].dt.date.between(d[0], d[1])])
+st.write("Al hacer click sobre la leyenda, permite remover o activar si se desea ver cierto estado.")
 
-with tab1:
+comp_df = df.loc[df["component"] == component].reset_index(drop=True)
 
-    df = df.loc[df["component"] == component].reset_index(drop=True)
-    # df = df.assign(pool_slot=df["pool_slot"].astype(str))
+# Date slider
+min_date = comp_df["changeout_date"].min().date()
+max_date = comp_df["arrival_date"].max().date()
+# Filter and sort data
+today = datetime.now()
+jan_1 = date(today.year, 1, 1)
+dec_31 = date(today.year, 12, 31)
 
-    # df['reversed_slot'] = df['pool_slot'].max() - df['pool_slot'] + 1
-    # Date slider
-    min_date = df["changeout_date"].min().date()
-    max_date = df["arrival_date"].max().date()
-    current_date = datetime.now().date()
-    # Filter and sort data
-    filtered_df = df[df["arrival_date"].dt.date > current_date].sort_values(
-        ["pool_slot", "arrival_date"], ascending=[True, False]
-    )
-    # Use drop_duplicates to keep only the first occurrence for each pool_number
-    filtered_df = filtered_df.drop_duplicates(subset="pool_slot", keep="first")
-    filtered_df = filtered_df.sort_values("arrival_date").reset_index(drop=True)
-    # Display upcoming arrivals using columns and metrics
-    st.subheader("Próximas llegadas de componente")
-    if not filtered_df.empty:
-        columns = st.columns(4)
-        for i, (_, row) in enumerate(filtered_df.iterrows()):
-            with columns[i % 4]:
-                days_until_arrival = (row["arrival_date"].date() - current_date).days
-                if row["pool_changeout_type"] == "E":
-                    days_until_arrival = "?"
-                    row["arrival_week"] = "?"
-                # repair_days = row["ohv_normal"] if row["pool_type"] == "P" else row["ohv_unplanned"]
-                # repair_color = "normal" if row["pool_type"] == "P" else "inverse"
+comp_df = modify_dataframe(comp_df)
+pool_slots = comp_df["pool_slot"].drop_duplicates().to_list()
 
-                st.metric(
-                    label=f"Equipo {row['equipo']}",
-                    value=f"{days_until_arrival} días restantes",
-                    # delta=f"{repair_days} days repair",
-                    # delta_color=repair_color,
-                )
-                st.write(f"Semana estimada de llegada: {row['arrival_week']}")
-                st.write(f"Fecha cambio componente: {row['changeout_date'].date()}")
-                map_dict = {"I": "Imprevisto", "P": "Planificado", "E": "Esperando"}
-                st.write(f"Tipo de cambio: {map_dict[row['pool_changeout_type']]}")
-                st.write("---")
-    else:
-        st.write("No upcoming arrivals for the selected date.")
+pool_slots_filter = st.sidebar.multiselect(
+    "Seleccionar de asignaciones del pool:", pool_slots, pool_slots, placeholder="hola"
+)
+st.sidebar.write("Permite filtrar que lineas del pool se desean visualizar.")
 
-    df = modify_dataframe(df)
+d = st.sidebar.date_input(
+    "Seleccionar fecha:",
+    (jan_1, max_date),
+    min_date,
+    max_date,
+    format="MM.DD.YYYY",
+)
 
-    # TODO: Cambiar a fecha móvil
-    today = datetime.now()
-    jan_1 = date(today.year, 1, 1)
-    dec_31 = date(today.year, 12, 31)
+fig = plot_pool_px_timeline(
+    comp_df.loc[(comp_df["pool_slot"].isin(pool_slots_filter)) & (comp_df["arrival_date"].dt.date.between(d[0], d[1]))]
+)
 
-    d = st.date_input(
-        "Select your vacation for next year",
-        (jan_1, max_date),
-        min_date,
-        max_date,
-        format="MM.DD.YYYY",
-    )
+st.plotly_chart(fig, use_container_width=True)
 
-    # st.subheader("Selected item")
-    # st.write(timeline2)
 
-    fig = plot_pool_px_timeline(df.loc[df["arrival_date"].dt.date.between(d[0], d[1])])
+st.title("Entregas confirmadas")
 
-    st.plotly_chart(fig, use_container_width=True)
+filtered_df = df[df["arrival_date"].dt.date > current_date].sort_values(
+    ["pool_slot", "arrival_date"], ascending=[True, False]
+)
+# Use drop_duplicates to keep only the first occurrence for each pool_number
+filtered_df = filtered_df.drop_duplicates(subset="pool_slot", keep="first")
+filtered_df = filtered_df.sort_values("arrival_date").reset_index(drop=True).head(4)
+# Display upcoming arrivals using columns and metrics
 
-    # st.dataframe(df.loc[df["component_code"] == "mp"])
+if not filtered_df.empty:
+    columns = st.columns(4)
+    for i, (_, row) in enumerate(filtered_df.iterrows()):
+        with columns[i % 4]:
+            days_until_arrival = (row["arrival_date"].date() - current_date).days
+            if row["pool_changeout_type"] == "E":
+                days_until_arrival = "?"
+                row["arrival_week"] = "?"
+            # repair_days = row["ohv_normal"] if row["pool_type"] == "P" else row["ohv_unplanned"]
+            # repair_color = "normal" if row["pool_type"] == "P" else "inverse"
+
+            st.metric(
+                label=f"Equipo {row['equipo']}",
+                value=f"{days_until_arrival} días restantes",
+                # delta=f"{repair_days} days repair",
+                # delta_color=repair_color,
+            )
+            st.write(f"Semana estimada de llegada: {row['arrival_week']}")
+            st.write(f"Fecha cambio componente: {row['changeout_date'].date()}")
+            map_dict = {"I": "Imprevisto", "P": "Planificado", "E": "Esperando"}
+            st.write(f"Tipo de cambio: {map_dict[row['pool_changeout_type']]}")
+            st.write("---")
+else:
+    st.write("No upcoming arrivals for the selected date.")
+
+timeline = plot_component_arrival_timeline(df)

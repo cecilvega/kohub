@@ -9,6 +9,24 @@ from datetime import timedelta
 
 styler()
 
+options_display = {
+    "blower": "Blower",
+    "cilindro_direccion": "Cilindro de Dirección",
+    "suspension_trasera": "Suspensión Trasera",
+    "conjunto_masa_suspension": "Conjunto Masa Suspensión",
+    "motor_traccion": "Motor de Tracción",
+    "cilindro_levante": "Cilindro de Levante",
+    "modulo_potencia": "Módulo de Potencia",
+}
+
+# Create the selectbox using the dictionary
+component = st.sidebar.selectbox(
+    "Selección de Componente",
+    options=list(options_display.keys()),
+    format_func=lambda x: options_display[x],
+    index=6,
+)
+
 
 def read_standard_overhauls():
     df = pd.read_excel("DATA/standard_overhaul_costs.xlsx")[
@@ -33,4 +51,5 @@ def fetch_and_clean_cc_data():
 
 
 df = fetch_and_clean_cc_data()
+df = df.loc[df["component"] == component].reset_index(drop=True)
 st.dataframe(df, use_container_width=True)

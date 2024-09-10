@@ -26,18 +26,21 @@ def clean_string(s):
 
 
 def read_cc():
-    # blob_service_client = BlobServiceClient(
-    #     account_url=os.environ["AZURE_ACCOUNT_URL"],
-    #     credential=os.environ["AZURE_SAS_TOKEN"],
-    # )
-    #
-    # blob_client = blob_service_client.get_blob_client(
-    #     container=os.environ["AZURE_CONTAINER_NAME"],
-    #     blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx",
-    # )
-    # blob_data = blob_client.download_blob()
-    # blob_data = BytesIO(blob_data.readall())
-    blob_data = "DATA/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx"
+    if os.environ.get("USERNAME") in ["cecilvega", "U1309565"]:
+        blob_data = "DATA/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx"
+    else:
+        blob_service_client = BlobServiceClient(
+            account_url=os.environ["AZURE_ACCOUNT_URL"],
+            credential=os.environ["AZURE_SAS_TOKEN"],
+        )
+
+        blob_client = blob_service_client.get_blob_client(
+            container=os.environ["AZURE_CONTAINER_NAME"],
+            blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx",
+        )
+        blob_data = blob_client.download_blob()
+        blob_data = BytesIO(blob_data.readall())
+
     df = pd.read_excel(blob_data)
     columns_map = {
         "EQUIPO": "equipo",

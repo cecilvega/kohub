@@ -3,9 +3,12 @@ from pathlib import Path
 from common import *
 from PIL import Image
 
-st.header("BHP 1")
-st.write(f"You are logged in as {st.session_state.role}.")
+st.header("BHP Minera Escondida")
 
-logo_path = Path("__file__").absolute().parent / "images/bhp-logo.png"
+root_path = Path("__file__").absolute().parent
+logo_path = root_path / "images/bhp-logo.png"
+news_path = root_path / "pages/bhp/news.md"
 
 st.sidebar.image(Image.open(logo_path))
+
+st.markdown(news_path.read_text(encoding="utf-8-sig"), unsafe_allow_html=True)

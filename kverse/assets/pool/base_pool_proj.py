@@ -11,17 +11,20 @@ import numpy as np
 
 
 def read_base_pool_proj():
-    # blob_service_client = BlobServiceClient(
-    #     account_url=os.environ["AZURE_ACCOUNT_URL"],
-    #     credential=os.environ["AZURE_SAS_TOKEN"],
-    # )
-    # blob_client = blob_service_client.get_blob_client(
-    #     container=os.environ["AZURE_CONTAINER_NAME"],
-    #     blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/pool_proj.csv",
-    # )
-    # blob_data = blob_client.download_blob().readall()
-    # blob_data = StringIO(blob_data.decode("latin-1"))
-    blob_data = "DATA/pool_proj.csv"
+    if os.environ.get("USERNAME") in ["cecilvega", "U1309565"]:
+        blob_data = "DATA/pool_proj.csv"
+    else:
+        blob_service_client = BlobServiceClient(
+            account_url=os.environ["AZURE_ACCOUNT_URL"],
+            credential=os.environ["AZURE_SAS_TOKEN"],
+        )
+        blob_client = blob_service_client.get_blob_client(
+            container=os.environ["AZURE_CONTAINER_NAME"],
+            blob=f"{os.environ['AZURE_PREFIX']}/PLANIFICACION/POOL/pool_proj.csv",
+        )
+        blob_data = blob_client.download_blob().readall()
+        blob_data = StringIO(blob_data.decode("latin-1"))
+
     df = pd.read_csv(blob_data)
     df = df.assign(
         equipo=df["equipo"].astype(str),

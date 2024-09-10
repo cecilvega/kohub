@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from datetime import datetime
 import numpy as np
 from streamlit_timeline import st_timeline
+import streamlit as st
 
 
 def validate_input(df):
@@ -76,7 +77,7 @@ def plot_pool_timeline(df):
     options = {
         "selectable": True,
         "multiselect": False,
-        "zoomable": True,
+        # "zoomable": True,
         "stack": False,
         "height": 500,
         "margin": {"item": 10},
@@ -123,7 +124,19 @@ def plot_component_arrival_timeline(df):
 
     # Get the last arrival for each unique combination of component_code and pool_slot
     df_last_arrivals = df.sort_values("arrival_date").groupby(["component", "pool_slot"]).last().reset_index()
-
+    df_last_arrivals = df_last_arrivals.assign(
+        component=df["component"].map(
+            lambda x: {
+                "blower": "Blower",
+                "cilindro_direccion": "Cilindro de Dirección",
+                "suspension_trasera": "Suspensión Trasera",
+                "conjunto_masa_suspension": "Conjunto Masa Suspensión",
+                "motor_traccion": "Motor de Tracción",
+                "cilindro_levante": "Cilindro de Levante",
+                "modulo_potencia": "Módulo de Potencia",
+            }.get(x)
+        )
+    )
     # Create items for the timeline
     items = []
     for _, row in df_last_arrivals.iterrows():
@@ -132,14 +145,12 @@ def plot_component_arrival_timeline(df):
             "content": f"Pool {row['pool_slot']}",
             "start": row["arrival_date"].strftime("%Y-%m-%d"),
             "group": str(row["component"]),
-            "style": "background-color: #00a7e1;",  # Blue color for all arrivals
+            "style": f"background-color: {get_color(row['pool_changeout_type'])};",
         }
         items.append(item)
 
     # Create groups for the timeline
-    groups = [
-        {"id": str(code), "content": f"Component {code}"} for code in sorted(df_last_arrivals["component"].unique())
-    ]
+    groups = [{"id": str(code), "content": code} for code in sorted(df_last_arrivals["component"].unique())]
 
     # Set up options for the timeline
     options = {
@@ -147,7 +158,7 @@ def plot_component_arrival_timeline(df):
         "multiselect": False,
         "zoomable": True,
         "stack": False,
-        "height": 600,  # Increased height to accommodate more component codes
+        "height": "350px",  # Increased height to accommodate more component codes
         "margin": {"item": 10},
         "groupHeightMode": "fixed",
         "orientation": {"axis": "top", "item": "top"},
@@ -155,7 +166,7 @@ def plot_component_arrival_timeline(df):
             "minorLabels": {"week": "w"},
             "majorLabels": {"week": "MMMM YYYY"},
         },
-        "showCurrentTime": True,
+        # "showCurrentTime": True,
         # "type": "point",  # Use point type for single-date events
     }
 
