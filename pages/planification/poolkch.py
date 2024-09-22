@@ -36,7 +36,7 @@ available_components = [
 def fetch_and_clean_data():
     cc_df = read_cc()
     pool_proj_df = read_base_pool_proj()
-    arrivals_df = read_pool_component_arrivals()
+    arrivals_df = read_component_arrivals()
     allocation = ComponentAllocation(cc_df, pool_proj_df, arrivals_df)
     df = allocation.generate_pool_projection()
     return df
@@ -48,10 +48,10 @@ df = fetch_and_clean_data()
 df = df.dropna(subset=["arrival_date"]).reset_index(drop=True)
 
 options_display = {
-    "blower": "Blower",
+    "blower_parilla": "Blower Parrilla",
     "cilindro_direccion": "Cilindro de Dirección",
     "suspension_trasera": "Suspensión Trasera",
-    "conjunto_masa_suspension": "Conjunto Masa Suspensión",
+    "conjunto_masa_suspension_delantera": "Conjunto Masa Suspensión Delantera",
     "motor_traccion": "Motor de Tracción",
     "cilindro_levante": "Cilindro de Levante",
     "modulo_potencia": "Módulo de Potencia",
@@ -83,9 +83,23 @@ dec_31 = date(today.year, 12, 31)
 comp_df = modify_dataframe(comp_df)
 pool_slots = comp_df["pool_slot"].drop_duplicates().to_list()
 
+
+def colorize_multiselect_options(colors: list[str]) -> None:
+    rules = ""
+    n_colors = len(colors)
+
+    for i, color in enumerate(colors):
+
+        rules += f""".stMultiSelect div[data-baseweb="select"] span[data-baseweb="tag"]:nth-child({n_colors}n+{i+1}){{background-color: {color};}}"""
+
+    st.markdown(f"<style>{rules}</style>", unsafe_allow_html=True)
+
+
 pool_slots_filter = st.sidebar.multiselect(
     "Seleccionar de asignaciones del pool:", pool_slots, pool_slots, placeholder="hola"
 )
+
+
 st.sidebar.write("Permite filtrar que lineas del pool se desean visualizar.")
 
 d = st.sidebar.date_input(
@@ -96,9 +110,19 @@ d = st.sidebar.date_input(
     format="MM.DD.YYYY",
 )
 
-fig = plot_pool_px_timeline(
-    comp_df.loc[(comp_df["pool_slot"].isin(pool_slots_filter)) & (comp_df["arrival_date"].dt.date.between(d[0], d[1]))]
+colors = (
+    comp_df.sort_values(["pool_slot", "arrival_date"])
+    .drop_duplicates(subset=["pool_slot"], keep="last")["pool_changeout_type"]
+    .map(lambda x: {"I": "#0079ec", "P": "#140a9a", "E": "#a5abaf", "R": "#ffc82f"}[x])
 )
+plot_df = comp_df.loc[
+    (comp_df["pool_slot"].isin(pool_slots_filter)) & (comp_df["arrival_date"].dt.date.between(d[0], d[1]))
+]
+
+## Number of colors does not need to match the number of options
+colorize_multiselect_options(colors)
+
+fig = plot_pool_px_timeline(plot_df)
 
 st.plotly_chart(fig, use_container_width=True)
 

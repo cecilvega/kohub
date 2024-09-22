@@ -9,10 +9,18 @@ from pages.planification.utils.vis_timeline import validate_input, prepare_data
 def create_base_chart(df):
     """Create the base Gantt chart with custom hover template."""
     hover_template = (
-        "<b>Component Serial:</b> %{customdata[4]}<br>"
-        "<b>Changeout Date:</b> %{x}<br>"
-        "<b>Arrival Date:</b> %{customdata[1]}<br>"
-        "<b>Days in Repair:</b> %{customdata[5]}"
+        "<b>Serie Componente:</b> %{customdata[0]}<br>"
+        "<b>Fecha de Cambio:</b> %{customdata[1]} <b>(%{customdata[2]})</b><br>"
+        "<b>Fecha llegada:</b> %{customdata[3]} <b>(%{customdata[4]})</b><br>"
+        "<b>Días reparación:</b> %{customdata[5]}"
+    )
+
+    # Create a custom column for viewing arrival date as a string format
+    df = df.assign(
+        vis_arrival_date=df["arrival_date"].dt.strftime("%Y-%m-%d"),
+        vis_changeout_date=df["changeout_date"].dt.strftime("%Y-%m-%d"),
+        changeout_week=df["changeout_date"].dt.strftime("W%W"),
+        arrival_week=df["arrival_date"].dt.strftime("W%W"),
     )
 
     fig = px.timeline(
@@ -21,8 +29,15 @@ def create_base_chart(df):
         x_end="arrival_date",
         y="pool_slot",
         color="pool_changeout_type",
-        color_discrete_map={"I": "#ff0000", "P": "#2bb673", "E": "#a5abaf", "R": "#f37021", "A": "#00a7e1"},
-        custom_data=["pool_slot", "arrival_date", "equipo", "component_serial", "component_serial", "days_in_repair"],
+        color_discrete_map={"I": "#0079ec", "P": "#140a9a", "E": "#a5abaf", "R": "#ffc82f", "A": "#00a7e1"},
+        custom_data=[
+            "component_serial",
+            "vis_changeout_date",
+            "changeout_week",
+            "vis_arrival_date",
+            "arrival_week",
+            "days_in_repair",
+        ],
         height=500,
         # title="Proyección en función de cambios reales",
     )

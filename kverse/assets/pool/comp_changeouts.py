@@ -6,6 +6,9 @@ from azure.storage.blob import BlobServiceClient
 from kverse.assets.master_components import master_components
 import unicodedata
 import re
+import openpyxl
+
+openpyxl.reader.excel.warnings.simplefilter(action="ignore")
 
 
 def clean_string(s):
@@ -26,17 +29,15 @@ def clean_string(s):
 
 
 def read_cc():
-    if os.environ.get("USERNAME") in ["cecilvega", "U1309565"]:
-        blob_data = "DATA/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx"
-    else:
-        blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
 
-        blob_client = blob_service_client.get_blob_client(
-            container="kdata-raw",
-            blob=f"PLANIFICACION/POOL/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx",
-        )
-        blob_data = blob_client.download_blob()
-        blob_data = BytesIO(blob_data.readall())
+    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
+
+    blob_client = blob_service_client.get_blob_client(
+        container="kdata-raw",
+        blob=f"PLANIFICACION/POOL/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx",
+    )
+    blob_data = blob_client.download_blob()
+    blob_data = BytesIO(blob_data.readall())
 
     df = pd.read_excel(blob_data)
     columns_map = {
@@ -54,24 +55,8 @@ def read_cc():
 
     # df = pd.merge(df, master_components(), validate="1:1")
 
-    df = (
-        df[list(columns_map.keys())]
-        .rename(columns=columns_map)
-        .assign(
-            equipo=lambda x: x["equipo"].str.extract(r"(\d+)"),
-            # component_code=lambda x: x["componente"].map(
-            #     lambda x: {
-            #         "Blower": "bp",
-            #         "Cilindro_Dirección": "cd",
-            #         "Suspensión_Trasera": "st",
-            #         "CMS": "cms",
-            #         "Motor_Tracción": "mt",
-            #         "Cilindro_Levante": "cl",
-            #         "Módulo_Potencia": "mp",
-            #     }.get(x)
-            # ),
-        )
-        # .dropna(subset=["component_code"])
+    df = df.rename(columns=columns_map).assign(  # [list(columns_map.keys())]
+        equipo=lambda x: x["equipo"].str.extract(r"(\d+)"),
     )
     df = df.dropna(subset=["component"])
     df = df.assign(component_serial=df["component_serial"].str.strip().str.replace("\t", ""))
@@ -84,7 +69,7 @@ def read_cc():
     df = df.assign(
         changeout_week=lambda x: x["changeout_date"]
         .dt.year.astype(str)
-        .str.cat(x["changeout_week"].astype(str), sep="-W")
+        .str.cat(x["changeout_week"].astype(int).astype(str), sep="-W")
     )
 
     return df

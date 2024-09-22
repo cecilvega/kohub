@@ -127,10 +127,10 @@ def plot_component_arrival_timeline(df):
     df_last_arrivals = df_last_arrivals.assign(
         component=df["component"].map(
             lambda x: {
-                "blower": "Blower",
+                "blower_parrilla": "Blower",
                 "cilindro_direccion": "Cilindro de Dirección",
                 "suspension_trasera": "Suspensión Trasera",
-                "conjunto_masa_suspension": "Conjunto Masa Suspensión",
+                "conjunto_masa_suspension_delantera": "Conjunto Masa Suspensión",
                 "motor_traccion": "Motor de Tracción",
                 "cilindro_levante": "Cilindro de Levante",
                 "modulo_potencia": "Módulo de Potencia",

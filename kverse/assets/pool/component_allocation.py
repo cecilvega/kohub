@@ -25,10 +25,10 @@ class ComponentCode:
 
 
 class ComponentType(Enum):
-    BP = ComponentCode("blower", "Blower", 51, 101)
+    BP = ComponentCode("blower_parrilla", "Blower", 51, 101)
     CD = ComponentCode("cilindro_direccion", "Cilindro Dirección", 46, 96)
     ST = ComponentCode("suspension_trasera", "Suspensión Trasera", 65, 125)
-    CMS = ComponentCode("conjunto_masa_suspension", "CMSD", 64, 124)
+    CMS = ComponentCode("conjunto_masa_suspension_delantera", "CMSD", 64, 124)
     MT = ComponentCode("motor_traccion", "Motor Tracción", 74, 134)
     CL = ComponentCode("cilindro_levante", "Cilindro Levante", 75, 135)
     MP = ComponentCode("modulo_potencia", "Módulo Potencia", 110, 170)
@@ -38,32 +38,21 @@ class ComponentType(Enum):
         return [component.value.code for component in cls]
 
 
-def find_available_pool_slot(pool_slots_df: pd.DataFrame, changeout: pd.Series) -> pd.DataFrame:
-    """
-    Find available pool slots for a given changeout.
+def find_available_pool_slot(component_df: pd.DataFrame, changeout: pd.Series) -> pd.DataFrame:
 
-    Args:
-        pool_slots_df (pd.DataFrame): DataFrame containing pool slot information.
-        changeout (pd.Series): Series containing changeout information.
-
-    Returns:
-        pd.DataFrame: DataFrame of available pool slots.
-    """
-    df = (
-        pool_slots_df.loc[pool_slots_df["component"] == changeout["component"]]
-        .sort_values(["pool_slot", "changeout_date"])
-        .drop_duplicates(subset=["pool_slot"], keep="last")
-    )
+    df = component_df.sort_values(["pool_slot", "changeout_date"]).drop_duplicates(subset=["pool_slot"], keep="last")
     df = (
         df[
-            (df["component"] == changeout["component"])
-            & (df["changeout_date"] < changeout["changeout_date"])
+            (df["changeout_date"] < changeout["changeout_date"])
             & (df["arrival_date"].notnull())
             & (df["arrival_date"] < changeout["changeout_date"] - pd.Timedelta(days=0))
         ]
         .sort_values("changeout_date")
         .drop_duplicates(subset=["pool_slot", "component"], keep="last")
     )
+
+    # assert not df.empty, changeout
+
     # df = pool_slots_df.copy()
 
     # df = (
@@ -215,28 +204,34 @@ class ComponentAllocation:
         df = df.assign(days_unchanged=(changeout_date - df["arrival_date"]).dt.days)
         return df.loc[df["days_unchanged"].idxmax()]
 
-    def add_arrival_date(self, df: pd.DataFrame, changeout: pd.Series) -> pd.DataFrame:
-        component_code = changeout["component"]
+    def add_arrival_date2(self, df: pd.DataFrame, component: str) -> pd.DataFrame:
+
         earliest_arrival = self.arrivals_df[
-            (self.arrivals_df["pool_slot"].isnull()) & (self.arrivals_df["component"] == component_code)
+            (self.arrivals_df["pool_slot"].isnull()) & (self.arrivals_df["component"] == component)
         ]["arrival_date"].min()
 
         if pd.isnull(earliest_arrival):
             return df
 
         earliest_arrival_df = self.arrivals_df.loc[
-            (self.arrivals_df["arrival_date"] == earliest_arrival) & (self.arrivals_df["component"] == component_code)
+            (self.arrivals_df["arrival_date"] == earliest_arrival) & (self.arrivals_df["component"] == component)
+        ]
+        # Unir las fechas de llegada a los cambios del pool sin llegadas confirmadas.
+        unconfirmed_df = (
+            df.loc[df["component"] == component]
+            .sort_values(["pool_slot", "changeout_date"])
+            .drop_duplicates(subset=["pool_slot"], keep="last")
+            .sort_values("arrival_date_proj")
+        )
+        unconfirmed_df = unconfirmed_df.loc[unconfirmed_df["confirmed"] == False].reset_index(drop=True)[
+            ["component", "arrival_date_proj", "changeout_date", "pool_slot"]
         ]
 
         earliest_arrival_df = pd.merge_asof(
             earliest_arrival_df[["component", "arrival_date"]].rename(
                 columns={"arrival_date": "earliest_arrival_date"}
             ),
-            df.loc[df["component"] == component_code]
-            .sort_values(["pool_slot", "changeout_date"])
-            .drop_duplicates(subset=["pool_slot"], keep="last")
-            .sort_values("arrival_date_proj")
-            .reset_index(drop=True)[["component", "arrival_date_proj", "changeout_date", "pool_slot"]],
+            unconfirmed_df,
             by="component",
             left_on="earliest_arrival_date",
             right_on="arrival_date_proj",
@@ -246,8 +241,7 @@ class ComponentAllocation:
         for _, row in earliest_arrival_df.iterrows():
             mask = (df["changeout_date"] == row["changeout_date"]) & (df["component"] == row["component"])
             df.loc[mask, "arrival_date"] = earliest_arrival
-            df.loc[mask, "merged"] = True
-
+            df.loc[mask, "confirmed"] = True
             self.arrivals_df.loc[
                 (self.arrivals_df["arrival_date"] == earliest_arrival)
                 & (self.arrivals_df["component"] == row["component"]),
@@ -255,6 +249,47 @@ class ComponentAllocation:
             ] = row["pool_slot"]
 
         return df
+
+    def add_arrival_date(self, component_df: pd.DataFrame, component_arrival_df: pd.DataFrame) -> pd.DataFrame:
+        # Unir las fechas de llegada a los cambios del pool sin llegadas confirmadas.
+        # unconfirmed_df = (
+        #     component_df.sort_values(["pool_slot", "changeout_date"])
+        #     .drop_duplicates(subset=["pool_slot"], keep="last")
+        #     .sort_values("arrival_date_proj")
+        # )
+        # Buscar todas las asignaciones de pool con llegadas no confirmadas
+        unconfirmed_df = (
+            component_df.loc[component_df["confirmed"] == False]
+            .sort_values("arrival_date_proj")
+            .reset_index(drop=True)[["component", "arrival_date_proj", "changeout_date", "pool_slot"]]
+        )
+        self.unconfirmed_df = unconfirmed_df
+
+        # La unión se efectua encontrando la fecha más cercana
+        component_arrival_df = pd.merge_asof(
+            component_arrival_df[["component", "arrival_date"]],
+            unconfirmed_df,
+            by="component",
+            left_on="arrival_date",
+            right_on="arrival_date_proj",
+            direction="nearest",
+        )
+
+        self.component_arrival_df = component_arrival_df
+
+        for _, row in component_arrival_df.iterrows():
+            mask = (component_df["changeout_date"] == row["changeout_date"]) & (
+                component_df["component"] == row["component"]
+            )
+            component_df.loc[mask, "arrival_date"] = row["arrival_date"]
+            component_df.loc[mask, "confirmed"] = True
+            self.arrivals_df.loc[
+                (self.arrivals_df["arrival_date"] == row["arrival_date"])
+                & (self.arrivals_df["component"] == row["component"]),
+                "pool_slot",
+            ] = row["pool_slot"]
+
+        return component_df
 
     def allocate_components(self) -> pd.DataFrame:
         """
@@ -267,33 +302,106 @@ class ComponentAllocation:
             ValueError: If no available slots are found for a component.
         """
         cc_df = self.missing_cc_df.sort_values(["component", "changeout_date"]).reset_index(drop=True)
-        df = self.pool_slots_df.copy()
-
+        frames = []
         for component in cc_df["component"].unique():
-            for _, changeout in cc_df.loc[cc_df["component"] == component].iterrows():
-                available_slots_df = find_available_pool_slot(df, changeout)
+            component_df = self.pool_slots_df.loc[self.pool_slots_df["component"] == component]
 
-                if available_slots_df.empty:
-                    df = self.add_arrival_date(df, changeout)
-                    available_slots_df = find_available_pool_slot(df, changeout)
+            print(f"#########\nAsignando pool a {component}:")
 
-                    if available_slots_df.empty:
-                        raise ValueError(f"No available slots found for component: {changeout['component']}")
+            # Encontrar semanas por donde va a ir iterando el algoritmo dado un componente
+            weeks = (
+                pd.concat(
+                    [
+                        self.missing_cc_df.loc[self.missing_cc_df["component"] == component]["changeout_week"],
+                        self.arrivals_df.loc[self.arrivals_df["component"] == component]["arrival_week"],
+                    ]
+                )
+                .drop_duplicates()
+                .reset_index(drop=True)
+                .to_list()
+            )
+            weeks = sorted(weeks)
+            for week in weeks:
+                print(f"\n{week}")
+                week_arrivals_df = self.arrivals_df.loc[
+                    (self.arrivals_df["arrival_week"] == week) & (self.arrivals_df["component"] == component)
+                ].reset_index(drop=True)
+                week_cc_df = cc_df.loc[
+                    (cc_df["changeout_week"] == week) & (cc_df["component"] == component)
+                ].reset_index(drop=True)
+                if week_arrivals_df.shape[0] == 0:
+                    print(f"Sin llegadas de componente")
+                else:
 
-                available_slot = self.find_most_time_unchanged_slot(available_slots_df, changeout["changeout_date"])
+                    print(
+                        f"Se agrega llegada componente {component} con fecha: {week_arrivals_df['arrival_date'].to_list()}"
+                    )
+                    component_df = component_df.pipe(self.add_arrival_date, week_arrivals_df)
 
-                new_row = changeout.copy()
-                new_row["pool_slot"] = available_slot["pool_slot"]
+                if week_cc_df.shape[0] == 0:
+                    print(f"No existen cambios de componente para la semana {week}, componente {component}")
+                else:
 
-                new_row = pd.DataFrame([new_row])
-                new_row = add_arrival_date_proj(new_row)
+                    # Proceder con agregar el componente
+                    for _, changeout in week_cc_df.iterrows():
+                        print(
+                            f"Se agrega cambio de componente con fecha: {changeout['changeout_date'].strftime('%Y-%m-%d')}, "
+                            f"equipo: {changeout['equipo']}, serie: {changeout['component_serial']}"
+                        )
+                        try:
+                            # 1. Verifica si el componente sujeto a cambio tiene disponibilidad en el pool
+                            available_slots_df = find_available_pool_slot(component_df, changeout)
+                            new_row = changeout.copy()
+                            new_row["confirmed"] = False
+                            available_slot = self.find_most_time_unchanged_slot(
+                                available_slots_df, changeout["changeout_date"]
+                            )
+                            new_row["pool_slot"] = available_slot["pool_slot"]
 
-                df = pd.concat([df, new_row], ignore_index=True)
-                df = df.sort_values("changeout_date")
+                            new_row = pd.DataFrame([new_row])
+                            new_row = add_arrival_date_proj(new_row)
+                            component_df = pd.concat([component_df, new_row], ignore_index=True)
+                            component_df = component_df.sort_values("changeout_date")
+                        except Exception as e:
+                            print(f"No se pudo agregar componente. \nError: {e}")
+                            continue
+                print("\n")
+            frames.append(component_df)
 
+        #
+        # for component in cc_df["component"].unique():
+
+        #     for _, changeout in cc_df.loc[cc_df["component"] == component].iterrows():
+        #         # 1. Verifica si el componente sujeto a cambio tiene disponibilidad en el pool
+        #         available_slots_df = find_available_pool_slot(df, changeout)
+        #         new_row = changeout.copy()
+        #         new_row["confirmed"] = False
+        #         # 2. Si no existe ningún puesto disponible, asignar una fecha de llegada real
+        #         if available_slots_df.empty:
+        #             df = self.add_arrival_date(df, changeout["component"])
+        #             available_slots_df = find_available_pool_slot(df, changeout)
+        #
+        #             if available_slots_df.empty:
+        #                 raise ValueError(f"No available slots found for component: {changeout['component']}")
+        #
+        #         available_slot = self.find_most_time_unchanged_slot(available_slots_df, changeout["changeout_date"])
+        #
+        #         new_row["pool_slot"] = available_slot["pool_slot"]
+        #         # Si agrego una nueva componente al pool, debiese estar la llegada real del componente
+        #
+        #         new_row = pd.DataFrame([new_row])
+        #         new_row = add_arrival_date_proj(new_row)
+        #
+        #         df = pd.concat([df, new_row], ignore_index=True)
+        #         df = df.sort_values("changeout_date")
+        #     while self.arrivals_df.loc[self.arrivals_df["component"] == component, "pool_slot"].isna().any():
+        #         df = self.add_arrival_date(df, changeout["component"])
+
+        df = pd.concat(frames)
         return df
 
     def get_base_pool_slots(self) -> pd.DataFrame:
+        # proyección en base a un archivo base para darle forma al gráfico de timeline
         merge_columns = ["equipo", "component", "component_serial", "changeout_week"]
 
         df = pd.merge(self.pool_proj_df, self.cc_df, on=merge_columns, how="left", suffixes=("_proj", ""))
@@ -302,22 +410,22 @@ class ComponentAllocation:
         df = df.drop(columns="pool_changeout_type_proj")
 
         df["changeout_date"] = df["changeout_date"].fillna(df["changeout_date_proj"])
+
         df = df.drop(columns="changeout_date_proj").reset_index(drop=True)
+
         df = add_arrival_date_proj(df)
-        # For expected changes, block arrival date with high time projection
+        # Para componentes en espera, forzar una fecha de proyección más grande con el fin de blockearlos esa linea del pool
         df = df.assign(
             arrival_date=np.where(df["pool_changeout_type"] == "E", df["arrival_date_proj"], df["arrival_date"])
         )
-        df["merged"] = False
+
+        # Los que no fecha llegada asignada en la planilla base son proyecciones, no llegadas reales
+        df = df.assign(confirmed=np.where(df["arrival_date"].isnull(), False, True))
+
         return df
 
     def get_missing_changeouts(self) -> pd.DataFrame:
-        """
-        Identify missing changeouts by comparing cc_df with pool_proj_df.
 
-        Returns:
-            DataFrame: DataFrame containing missing changeouts.
-        """
         merge_columns = ["equipo", "component", "component_serial", "changeout_week"]
         df = self.cc_df[self.cc_df["changeout_date"] >= CHANGEOUT_START_DATE]
         df = df[df["pool_changeout_type"] != "N"]
