@@ -6,7 +6,7 @@ import numpy as np
 from pages.planification.utils.vis_timeline import validate_input, prepare_data
 
 
-def create_base_chart(df):
+def create_base_chart(df, by_confirmed):
     """Create the base Gantt chart with custom hover template."""
     hover_template = (
         "<b>Serie Componente:</b> %{customdata[0]}<br>"
@@ -21,15 +21,35 @@ def create_base_chart(df):
         vis_changeout_date=df["changeout_date"].dt.strftime("%Y-%m-%d"),
         changeout_week=df["changeout_date"].dt.strftime("W%W"),
         arrival_week=df["arrival_date"].dt.strftime("W%W"),
+        # confirmed=df["confirmed"].astype(str),
     )
+
+    if not by_confirmed:
+        color = "pool_changeout_type"
+        color_discrete_map = {"I": "#0079ec", "P": "#140a9a", "E": "#a5abaf", "R": "#ffc82f", "A": "#00a7e1"}
+        trace_map = {
+            "I": "Imprevisto",
+            "P": "Planificando",
+            "E": "Esperando",
+            "R": "Componente a piso",
+            "A": "Adelantado",
+        }
+    else:
+        # print(df.confirmed.unique())
+        color = "confirmed"
+        color_discrete_map = {True: "#140a9a", False: "#ffc82f"}
+        trace_map = {
+            "True": "Confirmado",
+            "False": "No Confirmado",
+        }
 
     fig = px.timeline(
         df,
         x_start="changeout_date",
         x_end="arrival_date",
         y="pool_slot",
-        color="pool_changeout_type",
-        color_discrete_map={"I": "#0079ec", "P": "#140a9a", "E": "#a5abaf", "R": "#ffc82f", "A": "#00a7e1"},
+        color=color,
+        color_discrete_map=color_discrete_map,
         custom_data=[
             "component_serial",
             "vis_changeout_date",
@@ -37,6 +57,7 @@ def create_base_chart(df):
             "vis_arrival_date",
             "arrival_week",
             "days_in_repair",
+            "confirmed",
         ],
         height=500,
         # title="Proyección en función de cambios reales",
@@ -44,17 +65,7 @@ def create_base_chart(df):
 
     fig.update_traces(hovertemplate=hover_template)
 
-    fig.for_each_trace(
-        lambda t: t.update(
-            name={
-                "I": "Imprevisto",
-                "P": "Planificando",
-                "E": "Esperando",
-                "R": "Componente a piso",
-                "A": "Adelantado",
-            }[t.name]
-        )
-    )
+    fig.for_each_trace(lambda t: t.update(name=trace_map[t.name]))
     return fig
 
 
@@ -188,7 +199,7 @@ def add_invisible_trace(fig, df):
     )
 
 
-def plot_pool_px_timeline(df):
+def plot_pool_px_timeline(df, by_confirmed):
     """
     Create a Gantt chart of pool timeline using the provided DataFrame.
 
@@ -207,10 +218,13 @@ def plot_pool_px_timeline(df):
     validate_input(df)
     df = prepare_data(df)
 
+    if by_confirmed:
+        df = df.dropna(subset=["confirmed"]).reset_index(drop=True)
+
     # Calculate days in repair
     df["days_in_repair"] = (df["arrival_date"] - df["changeout_date"]).dt.days
 
-    fig = create_base_chart(df)
+    fig = create_base_chart(df, by_confirmed)
     customize_layout(fig, df)
     add_annotations(fig, df)
     add_invisible_trace(fig, df)

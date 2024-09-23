@@ -1,9 +1,9 @@
 [theme]
 base = "light"
 
-primaryColor = "#FF5519"  # BHP orange
+primaryColor = "#140a9a"  # BHP orange
 backgroundColor = "#FFFFFF"  # White
-secondaryBackgroundColor = "#F0F0F0"  # Light gray for contrast
+secondaryBackgroundColor = "#f0f1f5"  # Light gray for contrast
 textColor = "#000000"  # Black for text
 
 

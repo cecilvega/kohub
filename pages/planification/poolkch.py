@@ -115,14 +115,22 @@ colors = (
     .drop_duplicates(subset=["pool_slot"], keep="last")["pool_changeout_type"]
     .map(lambda x: {"I": "#0079ec", "P": "#140a9a", "E": "#a5abaf", "R": "#ffc82f"}[x])
 )
+
+
+# Filtro especial para ver cuales están confirmados
+confirmed_filter = st.sidebar.toggle = st.toggle("Componentes Confirmados")
+
 plot_df = comp_df.loc[
     (comp_df["pool_slot"].isin(pool_slots_filter)) & (comp_df["arrival_date"].dt.date.between(d[0], d[1]))
 ]
+# if confirmed_filter:
+#
+#     plot_df = plot_df.loc[(plot_df["confirmed"] == 1) | (plot_df["confirmed"].isnull())]
 
 ## Number of colors does not need to match the number of options
 colorize_multiselect_options(colors)
 
-fig = plot_pool_px_timeline(plot_df)
+fig = plot_pool_px_timeline(plot_df, by_confirmed=confirmed_filter)
 
 st.plotly_chart(fig, use_container_width=True)
 
