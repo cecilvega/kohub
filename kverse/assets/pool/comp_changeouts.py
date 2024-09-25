@@ -24,20 +24,22 @@ def clean_string(s):
 
         # Remove all non-alphanumeric characters except underscore
         s = re.sub(r"[^\w]+", "", s)
-        s = {"cms": "conjunto_masa_suspension"}.get(s, s)
+        s = {"cms": "conjunto_masa_suspension_delantera"}.get(s, s)
     return s
 
 
 def read_cc():
+    if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
+        blob_data = "DATA/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx"
+    else:
+        blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
 
-    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
-
-    blob_client = blob_service_client.get_blob_client(
-        container="kdata-raw",
-        blob=f"PLANIFICACION/POOL/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx",
-    )
-    blob_data = blob_client.download_blob()
-    blob_data = BytesIO(blob_data.readall())
+        blob_client = blob_service_client.get_blob_client(
+            container="kdata-raw",
+            blob=f"PLANIFICACION/POOL/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL.xlsx",
+        )
+        blob_data = blob_client.download_blob()
+        blob_data = BytesIO(blob_data.readall())
 
     df = pd.read_excel(blob_data)
     columns_map = {
@@ -59,11 +61,14 @@ def read_cc():
         equipo=lambda x: x["equipo"].str.extract(r"(\d+)"),
     )
     df = df.dropna(subset=["component"])
-    df = df.assign(component_serial=df["component_serial"].str.strip().str.replace("\t", ""))
+    df = df.assign(
+        component_serial=df["component_serial"].str.strip().str.replace("\t", ""),
+    )
 
     clean_columns = ["component", "subcomponent"]
 
     df[clean_columns] = df[clean_columns].apply(lambda x: x.apply(clean_string))
+    df = df.assign()
     df = df.loc[df["component"].isin(master_components()["component"].unique())].reset_index(drop=True)
 
     df = df.assign(

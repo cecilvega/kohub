@@ -77,7 +77,7 @@ def login():
     st.text_input("Username", key="username")
     st.text_input("Password", type="password", key="password")
     # For debugging purposes skip login
-    if os.environ.get("USERNAME") in ["cecilvega", "U1309565"]:
+    if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
         st.session_state.logged_in = True
         st.session_state.role = "Komatsu"
         st.rerun()

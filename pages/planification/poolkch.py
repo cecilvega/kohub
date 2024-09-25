@@ -118,7 +118,7 @@ colors = (
 
 
 # Filtro especial para ver cuales están confirmados
-confirmed_filter = st.sidebar.toggle = st.toggle("Componentes Confirmados")
+confirmed_filter = st.sidebar.toggle = st.toggle("Ver Confirmados")
 
 plot_df = comp_df.loc[
     (comp_df["pool_slot"].isin(pool_slots_filter)) & (comp_df["arrival_date"].dt.date.between(d[0], d[1]))
@@ -170,4 +170,7 @@ if not filtered_df.empty:
 else:
     st.write("No upcoming arrivals for the selected date.")
 
+
 timeline = plot_component_arrival_timeline(df)
+if timeline:
+    st.markdown(f"Fecha llegada: {timeline['start']}<br>Serie Componente: {timeline['group']}", unsafe_allow_html=True)

@@ -9,15 +9,17 @@ import re
 
 
 def read_component_arrivals():
+    if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
+        blob_data = "DATA/ENTREGAS_CONFIRMADAS_COMPONENTES.xlsx"
+    else:
+        blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
 
-    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
-
-    blob_client = blob_service_client.get_blob_client(
-        container="kdata-raw",
-        blob=f"PLANIFICACION/POOL/ENTREGAS_CONFIRMADAS_COMPONENTES.xlsx",
-    )
-    blob_data = blob_client.download_blob()
-    blob_data = BytesIO(blob_data.readall())
+        blob_client = blob_service_client.get_blob_client(
+            container="kdata-raw",
+            blob=f"PLANIFICACION/POOL/ENTREGAS_CONFIRMADAS_COMPONENTES.xlsx",
+        )
+        blob_data = blob_client.download_blob()
+        blob_data = BytesIO(blob_data.readall())
 
     df = pd.read_excel(blob_data)
 

@@ -35,20 +35,6 @@ def prepare_data(df):
 
 
 def plot_pool_timeline(df):
-    """
-    Create a timeline of pool events using the streamlit_timeline library.
-
-    Parameters:
-    df (pandas.DataFrame): Input DataFrame containing pool timeline data.
-                           Required columns: pool_slot, changeout_date, arrival_date,
-                           pool_changeout_type, equipo, component_serial
-
-    Returns:
-    streamlit_timeline object: A Streamlit timeline object representing the pool events.
-
-    Raises:
-    ValueError: If required columns are missing from the input DataFrame.
-    """
 
     validate_input(df)
     df = prepare_data(df)
@@ -98,33 +84,20 @@ def plot_pool_timeline(df):
 def get_color(change_type):
     """Return color based on pool_changeout_type."""
     color_map = {
-        "I": "#ff0000",  # Red
-        "P": "#2bb673",  # Green
+        "I": "#00A0EC",  # Red
+        "P": "#0079EC",  # Green
         "E": "#a5abaf",  # Gray
-        "R": "#f37021",  # Orange
+        "R": "#ffc82f",  # Orange
         "A": "#00a7e1",  # Blue
     }
     return color_map.get(change_type, "#000000")  # Default to black if not found
 
 
 def plot_component_arrival_timeline(df):
-    """
-    Create a timeline of component arrivals using the streamlit_timeline library.
-
-    Parameters:
-    df (pandas.DataFrame): Input DataFrame containing component arrival data.
-                           Required columns: component_code, pool_slot, arrival_date
-
-    Returns:
-    streamlit_timeline object: A Streamlit timeline object representing the component arrivals.
-
-    Raises:
-    ValueError: If required columns are missing from the input DataFrame.
-    """
 
     # Get the last arrival for each unique combination of component_code and pool_slot
-    df_last_arrivals = df.sort_values("arrival_date").groupby(["component", "pool_slot"]).last().reset_index()
-    df_last_arrivals = df_last_arrivals.assign(
+    # df_last_arrivals = df.sort_values("arrival_date")  # .groupby(["component", "pool_slot"]).last().reset_index()
+    df = df.assign(
         component=df["component"].map(
             lambda x: {
                 "blower_parrilla": "Blower",
@@ -137,20 +110,26 @@ def plot_component_arrival_timeline(df):
             }.get(x)
         )
     )
+    # st.dataframe(df)
+    df = df.loc[df["arrival_status"] == "confirmed"].reset_index(drop=True)
+
+    # st.dataframe(df)
+
     # Create items for the timeline
     items = []
-    for _, row in df_last_arrivals.iterrows():
+    for _, row in df.iterrows():
         item = {
             "id": str(len(items) + 1),
-            "content": f"Pool {row['pool_slot']}",
+            "content": f"{row['component_serial']}",
             "start": row["arrival_date"].strftime("%Y-%m-%d"),
             "group": str(row["component"]),
             "style": f"background-color: {get_color(row['pool_changeout_type'])};",
         }
         items.append(item)
+    # st.write(items)
 
     # Create groups for the timeline
-    groups = [{"id": str(code), "content": code} for code in sorted(df_last_arrivals["component"].unique())]
+    groups = [{"id": str(code), "content": code} for code in sorted(df["component"].unique())]
 
     # Set up options for the timeline
     options = {

@@ -21,7 +21,6 @@ def create_base_chart(df, by_confirmed):
         vis_changeout_date=df["changeout_date"].dt.strftime("%Y-%m-%d"),
         changeout_week=df["changeout_date"].dt.strftime("W%W"),
         arrival_week=df["arrival_date"].dt.strftime("W%W"),
-        # confirmed=df["confirmed"].astype(str),
     )
 
     if not by_confirmed:
@@ -36,12 +35,10 @@ def create_base_chart(df, by_confirmed):
         }
     else:
         # print(df.confirmed.unique())
-        color = "confirmed"
-        color_discrete_map = {True: "#140a9a", False: "#ffc82f"}
-        trace_map = {
-            "True": "Confirmado",
-            "False": "No Confirmado",
-        }
+        color = "arrival_status"
+        # color_discrete_map = {}
+        color_discrete_map = {"confirmed": "#140a9a", "unconfirmed": "#0079ec", "historical": "#ffc82f"}
+        trace_map = {"confirmed": "Confirmado", "historical": "Histórico", "unconfirmed": "No Confirmado"}
 
     fig = px.timeline(
         df,
@@ -57,7 +54,7 @@ def create_base_chart(df, by_confirmed):
             "vis_arrival_date",
             "arrival_week",
             "days_in_repair",
-            "confirmed",
+            "arrival_status",
         ],
         height=500,
         # title="Proyección en función de cambios reales",
@@ -219,7 +216,7 @@ def plot_pool_px_timeline(df, by_confirmed):
     df = prepare_data(df)
 
     if by_confirmed:
-        df = df.dropna(subset=["confirmed"]).reset_index(drop=True)
+        df = df.dropna(subset=["arrival_status"]).reset_index(drop=True)
 
     # Calculate days in repair
     df["days_in_repair"] = (df["arrival_date"] - df["changeout_date"]).dt.days
