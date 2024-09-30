@@ -25,9 +25,6 @@ def read_base_pool_proj():
     df = pd.read_csv(blob_data)
     df = df.assign(
         equipo=df["equipo"].astype(str),
-        # arrival_date=lambda x: np.where(
-        #     x["arrival_week"].notnull(), x["arrival_week"].map(lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w"))
-        # ),
     )
     df.loc[df["arrival_week"].notnull(), "arrival_date"] = df.loc[df["arrival_week"].notnull()]["arrival_week"].map(
         lambda x: datetime.strptime(x + "-1", "%Y-W%W-%w")

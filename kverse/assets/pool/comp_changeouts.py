@@ -68,7 +68,14 @@ def read_cc():
     clean_columns = ["component", "subcomponent"]
 
     df[clean_columns] = df[clean_columns].apply(lambda x: x.apply(clean_string))
-    df = df.assign()
+
+    df = df.assign(
+        component=df["component"].map(
+            lambda x: {"conjunto_masa_suspension_delantera": "suspension_delantera", "blower": "blower_parrilla"}.get(
+                x, x
+            )
+        )
+    )
     df = df.loc[df["component"].isin(master_components()["component"].unique())].reset_index(drop=True)
 
     df = df.assign(
