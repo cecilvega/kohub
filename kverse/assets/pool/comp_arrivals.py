@@ -116,9 +116,10 @@ def read_component_arrivals():
         blob_data = blob_client.download_blob()
         blob_data = BytesIO(blob_data.readall())
 
-    df = pd.read_excel(blob_data)
     workbook = openpyxl.load_workbook(blob_data)
+    frames = []
     for sheet in workbook.sheetnames:
+
         df = pd.read_excel(blob_data, sheet_name=sheet, skiprows=1, engine="openpyxl", dtype="str")
         # Assume df is your DataFrame
         df = rename_datetime_columns(df)
@@ -139,7 +140,8 @@ def read_component_arrivals():
             df[df["value"].notna()]["arrival_date"].notna().all()
             and df[df["value"].notna()]["arrival_type"].notna().all()
         ), "Some non-null values resulted in null arrival_date2 or arrival_type"
-
+        frames.append(df)
+    df = pd.concat(frames)
     df = df.assign(
         component=df["Componente"].map(
             lambda x: {
@@ -153,6 +155,20 @@ def read_component_arrivals():
             }[x]
         )
     )
+
+    # Convert weeks to datetime for proper sorting
+    df["arrival_projection_week"] = pd.to_datetime(df["arrival_projection_week"] + "-1", format="%Y-W%W-%w")
+    df["arrival_week"] = pd.to_datetime(df["arrival_week"] + "-1", format="%Y-W%W-%w")
+
+    # Sort values to ensure the latest arrival_projection_week comes last
+    df_latest = df.groupby(["component", "arrival_week"])["arrival_projection_week"].max().reset_index()
+    # Merge the original DataFrame with the latest arrival_projection_week DataFrame
+    df = pd.merge(df, df_latest, on=["component", "arrival_week", "arrival_projection_week"], how="inner")
+
+    # Convert back to week format
+    df["arrival_projection_week"] = df["arrival_projection_week"].dt.strftime("%Y-W%W")
+    df["arrival_week"] = df["arrival_week"].dt.strftime("%Y-W%W")
+
     return df
 
 
@@ -183,4 +199,5 @@ def read_component_arrivals_old():
         .dropna()
         .reset_index(drop=True)
     )
+
     return df
