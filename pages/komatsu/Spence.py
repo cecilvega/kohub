@@ -83,8 +83,6 @@ pivot_data = (
 )
 
 
-st.dataframe(pivot_data)
-
 pivot_data = pivot_data.reset_index()
 fig = px.line(
     pivot_data,
