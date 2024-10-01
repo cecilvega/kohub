@@ -67,7 +67,7 @@ def style_dataframe(df):
 
 
 # Display the table
-st.title("Tendencia Estiba por Pala y Operador")
+# st.title("Tendencia Estiba por Pala y Operador")
 st.dataframe(style_dataframe(data), use_container_width=True, hide_index=True)
 
 
