@@ -11,6 +11,7 @@ from azure.storage.blob import BlobServiceClient
 from io import BytesIO
 from kverse.assets.pool import *
 from pages.planification.utils.vis_px_timeline import plot_pool_px_timeline
+from kverse.assets.pool.blocked_lanes import read_blocked_lanes
 from pages.planification.utils.vis_timeline import plot_pool_timeline, plot_component_arrival_timeline
 from pages.planification.utils.preprocessing import modify_dataframe
 from datetime import datetime, date, timedelta
@@ -21,15 +22,10 @@ styler()
 
 current_date = datetime.now().date()
 
-available_components = [
-    "blower",
-    "cilindro_direccion",
-    "motor_traccion",
-    "suspension_trasera",
-    "conjunto_masa_suspension",
-    "cilindro_levante",
-    "modulo_potencia",
-]
+
+@st.cache_data(ttl=timedelta(hours=1))
+def fetch_arrivals(ttl=timedelta(hours=1)):
+    return read_component_arrivals()
 
 
 @st.cache_data(ttl=timedelta(hours=1))
@@ -37,21 +33,23 @@ def fetch_and_clean_data():
     cc_df = read_cc()
     pool_proj_df = read_base_pool_proj()
     arrivals_df = read_component_arrivals()
-    allocation = ComponentAllocation(cc_df, pool_proj_df, arrivals_df)
+    blocked_lanes = read_blocked_lanes()
+    allocation = ComponentAllocation(cc_df, pool_proj_df, arrivals_df, blocked_lanes)
     df = allocation.generate_pool_projection()
     return df
 
 
 df = fetch_and_clean_data()
+arrivals_df = fetch_arrivals()
 
 # Drop missing components
 df = df.dropna(subset=["arrival_date"]).reset_index(drop=True)
 
 options_display = {
-    "blower_parilla": "Blower Parrilla",
+    "blower_parrilla": "Blower Parrilla",
     "cilindro_direccion": "Cilindro de Dirección",
     "suspension_trasera": "Suspensión Trasera",
-    "conjunto_masa_suspension_delantera": "Conjunto Masa Suspensión Delantera",
+    "suspension_delantera": "Suspensión Delantera",
     "motor_traccion": "Motor de Tracción",
     "cilindro_levante": "Cilindro de Levante",
     "modulo_potencia": "Módulo de Potencia",
@@ -137,40 +135,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.title("Entregas confirmadas")
 
-filtered_df = df[df["arrival_date"].dt.date > current_date].sort_values(
-    ["pool_slot", "arrival_date"], ascending=[True, False]
-)
-# Use drop_duplicates to keep only the first occurrence for each pool_number
-filtered_df = filtered_df.drop_duplicates(subset="pool_slot", keep="first")
-filtered_df = filtered_df.sort_values("arrival_date").reset_index(drop=True).head(4)
-# Display upcoming arrivals using columns and metrics
 
-if not filtered_df.empty:
-    columns = st.columns(4)
-    for i, (_, row) in enumerate(filtered_df.iterrows()):
-        with columns[i % 4]:
-            days_until_arrival = (row["arrival_date"].date() - current_date).days
-            if row["pool_changeout_type"] == "E":
-                days_until_arrival = "?"
-                row["arrival_week"] = "?"
-            # repair_days = row["ohv_normal"] if row["pool_type"] == "P" else row["ohv_unplanned"]
-            # repair_color = "normal" if row["pool_type"] == "P" else "inverse"
-
-            st.metric(
-                label=f"Equipo {row['equipo']}",
-                value=f"{days_until_arrival} días restantes",
-                # delta=f"{repair_days} days repair",
-                # delta_color=repair_color,
-            )
-            st.write(f"Semana estimada de llegada: {row['arrival_week']}")
-            st.write(f"Fecha cambio componente: {row['changeout_date'].date()}")
-            map_dict = {"I": "Imprevisto", "P": "Planificado", "E": "Esperando"}
-            st.write(f"Tipo de cambio: {map_dict[row['pool_changeout_type']]}")
-            st.write("---")
-else:
-    st.write("No upcoming arrivals for the selected date.")
-
-
-timeline = plot_component_arrival_timeline(df)
+timeline = plot_component_arrival_timeline(arrivals_df)
 if timeline:
     st.markdown(f"Fecha llegada: {timeline['start']}<br>Serie Componente: {timeline['group']}", unsafe_allow_html=True)

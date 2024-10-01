@@ -63,13 +63,13 @@ def extract_date_and_type(value):
         return pd.NaT, "PROYECTADO"
 
     value_str = str(value)
-    date_match = re.search(r"\d{2,4}[-/]\d{2}[-/]\d{2,4}", value_str)
+    date_match = re.search(r"\d{2}[-]\d{2}[-]\d{4}", value_str)
 
     if date_match:
         date_str = date_match.group()
         try:
-            date = pd.to_datetime(date_str)
-            arrival_date = date.strftime("%Y-%m-%d")
+            arrival_date = pd.to_datetime(date_str, format="%d-%m-%Y")
+            # arrival_date = date.strftime("%d-%m-%Y")
         except:
             arrival_date = pd.NaT
     else:
@@ -132,25 +132,26 @@ def read_component_arrivals():
         )
         df = df.dropna(subset=["Componente", "Número"])
 
-        df = df.pipe(reshape_to_long_format)
+        df = df.pipe(reshape_to_long_format).dropna(subset=["value"])
 
         df[["arrival_date", "arrival_type"]] = df["value"].apply(lambda x: pd.Series(extract_date_and_type(x)))
         # Add an overall assertion check
+
         assert (
             df[df["value"].notna()]["arrival_date"].notna().all()
             and df[df["value"].notna()]["arrival_type"].notna().all()
-        ), "Some non-null values resulted in null arrival_date2 or arrival_type"
+        ), "Some non-null values resulted in null arrival_date or arrival_type"
         frames.append(df)
     df = pd.concat(frames)
     df = df.assign(
         component=df["Componente"].map(
             lambda x: {
-                "Blower parrillas 930 - 960": "blower",
+                "Blower parrillas 930 - 960": "blower_parrilla",
                 "Cil. de dirección 960": "cilindro_direccion",
                 "Cil. de levante 960": "cilindro_levante",
                 "Motor de tracción 960": "motor_traccion",
                 "Módulo Potencia 960": "modulo_potencia",
-                "Suspensión delantera 960": "conjunto_masa_suspension",
+                "Suspensión delantera 960": "suspension_delantera",
                 "Suspensión trasera 960": "suspension_trasera",
             }[x]
         )
@@ -159,11 +160,12 @@ def read_component_arrivals():
     # Convert weeks to datetime for proper sorting
     df["arrival_projection_week"] = pd.to_datetime(df["arrival_projection_week"] + "-1", format="%Y-W%W-%w")
     df["arrival_week"] = pd.to_datetime(df["arrival_week"] + "-1", format="%Y-W%W-%w")
+    # df["arrival_date"] = pd.to_datetime(df["arrival_date"], format="%d-%m-%Y")
 
     # Sort values to ensure the latest arrival_projection_week comes last
-    df_latest = df.groupby(["component", "arrival_week"])["arrival_projection_week"].max().reset_index()
+    df_latest = df.groupby(["arrival_week"])["arrival_projection_week"].max().reset_index()
     # Merge the original DataFrame with the latest arrival_projection_week DataFrame
-    df = pd.merge(df, df_latest, on=["component", "arrival_week", "arrival_projection_week"], how="inner")
+    df = pd.merge(df, df_latest, on=["arrival_week", "arrival_projection_week"], how="inner")
 
     # Convert back to week format
     df["arrival_projection_week"] = df["arrival_projection_week"].dt.strftime("%Y-W%W")

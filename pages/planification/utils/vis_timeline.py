@@ -9,6 +9,7 @@ from datetime import datetime
 import numpy as np
 from streamlit_timeline import st_timeline
 import streamlit as st
+from datetime import timedelta
 
 
 def validate_input(df):
@@ -84,49 +85,70 @@ def plot_pool_timeline(df):
 def get_color(change_type):
     """Return color based on pool_changeout_type."""
     color_map = {
-        "I": "#00A0EC",  # Red
-        "P": "#0079EC",  # Green
-        "E": "#a5abaf",  # Gray
-        "R": "#ffc82f",  # Orange
-        "A": "#00a7e1",  # Blue
+        "REPROGRAMADO": "#942d00",  # Red
+        "REAL": "#007569",  # Green
+        # "E": "#a5abaf",  # Gray
+        # "R": "#ffc82f",  # Orange
+        "PROYECTADO": "#140a9a",  # Blue
     }
     return color_map.get(change_type, "#000000")  # Default to black if not found
 
 
 def plot_component_arrival_timeline(df):
 
-    # Get the last arrival for each unique combination of component_code and pool_slot
-    # df_last_arrivals = df.sort_values("arrival_date")  # .groupby(["component", "pool_slot"]).last().reset_index()
     df = df.assign(
         component=df["component"].map(
             lambda x: {
-                "blower_parrilla": "Blower",
+                "blower_parrilla": "Blower Parrilla",
                 "cilindro_direccion": "Cilindro de Dirección",
                 "suspension_trasera": "Suspensión Trasera",
-                "conjunto_masa_suspension_delantera": "Conjunto Masa Suspensión",
+                "suspension_delantera": "Suspensión Delantera",
                 "motor_traccion": "Motor de Tracción",
                 "cilindro_levante": "Cilindro de Levante",
                 "modulo_potencia": "Módulo de Potencia",
-            }.get(x)
+            }[x]
         )
     )
-    # st.dataframe(df)
-    df = df.loc[df["arrival_status"] == "confirmed"].reset_index(drop=True)
+    df["label"] = df.groupby(["component", "arrival_date"])["arrival_date"].transform("count").astype(str)
+    df["label"] = df["arrival_date"].dt.strftime("%Y-%m-%d") + " (" + df["label"] + ")"
 
-    # st.dataframe(df)
+    # TODO: RETOMAR
+    # proj_df = df.loc[
+    #     (df["arrival_type"] == "PROYECTADO") & (df["arrival_date"] >= (datetime.now() - timedelta(days=7)))
+    # ].sort_values("arrival_date")
+    # columns = st.columns(4)
+    # for i, (_, row) in enumerate(proj_df.iterrows()):
+    #     with columns[i % 4]:
+    #         days_until_arrival = (row["arrival_date"].date() - datetime.now().date()).days
+    #         # if row["pool_changeout_type"] == "E":
+    #         #     days_until_arrival = "?"
+    #         #     row["arrival_week"] = "?"
+    #         # repair_days = row["ohv_normal"] if row["pool_type"] == "P" else row["ohv_unplanned"]
+    #         # repair_color = "normal" if row["pool_type"] == "P" else "inverse"
+    #
+    #         st.metric(
+    #             label=f"{row['component']}",
+    #             value=f"{days_until_arrival} días restantes",
+    #             # delta=f"{repair_days} days repair",
+    #             # delta_color=repair_color,
+    #         )
+    #         st.write(f"Semana estimada de llegada: {row['arrival_week']}")
+    #         # st.write(f"Fecha cambio componente: {row['changeout_date'].date()}")
+    #         # map_dict = {"I": "Imprevisto", "P": "Planificado", "E": "Esperando"}
+    #         # st.write(f"Tipo de cambio: {map_dict[row['pool_changeout_type']]}")
+    #         st.write("---")
 
     # Create items for the timeline
     items = []
     for _, row in df.iterrows():
         item = {
             "id": str(len(items) + 1),
-            "content": f"{row['component_serial']}",
+            "content": f"{row['label']}",
             "start": row["arrival_date"].strftime("%Y-%m-%d"),
-            "group": str(row["component"]),
-            "style": f"background-color: {get_color(row['pool_changeout_type'])};",
+            "group": row["component"],
+            "style": f"background-color: {get_color(row['arrival_type'])};color: white;",
         }
         items.append(item)
-    # st.write(items)
 
     # Create groups for the timeline
     groups = [{"id": str(code), "content": code} for code in sorted(df["component"].unique())]
@@ -137,7 +159,7 @@ def plot_component_arrival_timeline(df):
         "multiselect": False,
         "zoomable": True,
         "stack": False,
-        "height": "350px",  # Increased height to accommodate more component codes
+        "height": "450px",  # Increased height to accommodate more component codes
         "margin": {"item": 10},
         "groupHeightMode": "fixed",
         "orientation": {"axis": "top", "item": "top"},
@@ -145,8 +167,6 @@ def plot_component_arrival_timeline(df):
             "minorLabels": {"week": "w"},
             "majorLabels": {"week": "MMMM YYYY"},
         },
-        # "showCurrentTime": True,
-        # "type": "point",  # Use point type for single-date events
     }
 
     # Create and return the timeline

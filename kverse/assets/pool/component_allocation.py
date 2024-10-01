@@ -9,7 +9,7 @@ import numpy as np
 from dataclasses import dataclass
 
 # Constants
-DATE_FORMAT = "%Y-W%W-%w"
+
 CHANGEOUT_START_DATE = pd.Timestamp(2024, 6, 1)
 
 
@@ -28,7 +28,7 @@ class ComponentType(Enum):
     BP = ComponentCode("blower_parrilla", "Blower", 51, 101)
     CD = ComponentCode("cilindro_direccion", "Cilindro Dirección", 46, 96)
     ST = ComponentCode("suspension_trasera", "Suspensión Trasera", 65, 125)
-    CMS = ComponentCode("conjunto_masa_suspension_delantera", "CMSD", 64, 124)
+    CMS = ComponentCode("suspension_delantera", "CMSD", 64, 124)
     MT = ComponentCode("motor_traccion", "Motor Tracción", 74, 134)
     CL = ComponentCode("cilindro_levante", "Cilindro Levante", 75, 135)
     MP = ComponentCode("modulo_potencia", "Módulo Potencia", 110, 170)
@@ -74,7 +74,6 @@ def add_arrival_date_proj(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["ovh_days"] = df.apply(get_ovh_days, axis=1)
     df["arrival_date_proj"] = df["changeout_date"] + pd.to_timedelta(df["ovh_days"], unit="D")
-    df.loc[df["pool_changeout_type"] == "E", "arrival_date_proj"] = df["changeout_date"] + pd.to_timedelta(200, "D")
     df["arrival_week_proj"] = df["arrival_date_proj"].dt.strftime("%G-W%V")
 
     return df.drop(columns=["ovh_days"])
@@ -115,16 +114,14 @@ def priority_sort(df: pd.DataFrame) -> pd.DataFrame:
 
 class ComponentAllocation:
     def __init__(
-        self,
-        cc_df: pd.DataFrame,
-        pool_proj_df: pd.DataFrame,
-        arrivals_df: pd.DataFrame,
+        self, cc_df: pd.DataFrame, pool_proj_df: pd.DataFrame, arrivals_df: pd.DataFrame, blocked_lanes: pd.DataFrame
     ):
+        self.blocked_lanes = blocked_lanes
         self.cc_df = self._preprocess_cc_df(cc_df)
         self.pool_proj_df = self._preprocess_pool_proj_df(pool_proj_df)
         self.arrivals_df = self._preprocess_arrivals_df(arrivals_df)
-        self.missing_cc_df = None
-        self.pool_slots_df = None
+        self.missing_cc_df = self.get_missing_changeouts()
+        self.pool_slots_df = self.get_base_pool_slots()
 
     def _preprocess_cc_df(self, cc_df: pd.DataFrame) -> pd.DataFrame:
         cc_df = priority_sort(cc_df)
@@ -137,17 +134,22 @@ class ComponentAllocation:
 
     def _preprocess_arrivals_df(self, arrivals_df: pd.DataFrame) -> pd.DataFrame:
         df = arrivals_df.copy()
-        df = df.loc[df["arrival_date"] >= CHANGEOUT_START_DATE].reset_index(drop=True)
-        merge_columns = ["component", "arrival_week"]
-        df = pd.merge(
-            df.drop(columns=["arrival_date"]),
-            self.pool_proj_df[merge_columns],
-            on=merge_columns,
-            how="left",
-            indicator=True,
-        )
-        df = df.loc[df["_merge"] == "left_only"].drop(columns="_merge")
-        df["arrival_date"] = df["arrival_week"].apply(lambda x: datetime.strptime(f"{x}-1", DATE_FORMAT))
+
+        # merge_columns = ["component", "arrival_week"]
+        # df = pd.merge(
+        #     df.drop(columns=["arrival_date"]),
+        #     self.pool_proj_df[merge_columns],
+        #     on=merge_columns,
+        #     how="left",
+        #     indicator=True,
+        # )
+        # df = df.loc[df["_merge"] == "left_only"].drop(columns="_merge")
+
+        df = df[["component", "arrival_week", "arrival_date", "arrival_type"]]
+        # Para la proyección por plan, se usa modifica sólo acorde las llegadas reales.
+        df = df.loc[df["arrival_type"] == "REAL"].drop(columns=["arrival_type"]).reset_index(drop=True)
+
+        # df["arrival_date"] = df["arrival_week"].apply(lambda x: datetime.strptime(f"{x}-1", DATE_FORMAT))
         df["pool_slot"] = None
         return df
 
@@ -202,9 +204,8 @@ class ComponentAllocation:
 
     def allocate_components(self) -> pd.DataFrame:
 
-        cc_df = self.missing_cc_df.sort_values(["component", "changeout_date"]).reset_index(drop=True)
         frames = []
-        for component in cc_df["component"].unique():
+        for component in self.missing_cc_df["component"].unique():
             component_df = self.pool_slots_df.loc[self.pool_slots_df["component"] == component]
 
             print(f"#########\nAsignando pool a {component}:")
@@ -227,8 +228,8 @@ class ComponentAllocation:
                 week_arrivals_df = self.arrivals_df.loc[
                     (self.arrivals_df["arrival_week"] == week) & (self.arrivals_df["component"] == component)
                 ].reset_index(drop=True)
-                week_cc_df = cc_df.loc[
-                    (cc_df["changeout_week"] == week) & (cc_df["component"] == component)
+                week_cc_df = self.missing_cc_df.loc[
+                    (self.missing_cc_df["changeout_week"] == week) & (self.missing_cc_df["component"] == component)
                 ].reset_index(drop=True)
                 if week_arrivals_df.shape[0] == 0:
                     print(f"Sin llegadas de componente")
@@ -249,24 +250,28 @@ class ComponentAllocation:
                             f"Se agrega cambio de componente con fecha: {changeout['changeout_date'].strftime('%Y-%m-%d')}, "
                             f"equipo: {changeout['equipo']}, serie: {changeout['component_serial']}"
                         )
-                        # 1. Verifica si el componente sujeto a cambio tiene disponibilidad en el pool
-                        available_slots_df = find_available_pool_slot(component_df, changeout)
-                        if not available_slots_df.empty:
-                            new_row = changeout.copy()
-                            new_row["arrival_status"] = "unconfirmed"
-                            available_slot = self.find_most_time_unchanged_slot(
-                                available_slots_df, changeout["changeout_date"]
-                            )
-                            new_row["pool_slot"] = available_slot["pool_slot"]
+                        new_row = changeout.copy()
+                        # 0. Omite verificar si tiene disponibilidad en el pool en caso de que sea linea blockeada esperando
+                        if not changeout["pool_changeout_type"] == "E":
+                            # 1. Verifica si el componente sujeto a cambio tiene disponibilidad en el pool
+                            available_slots_df = find_available_pool_slot(component_df, changeout)
+                            if not available_slots_df.empty:
 
-                            new_row = pd.DataFrame([new_row])
-                            new_row = add_arrival_date_proj(new_row)
-                            component_df = pd.concat([component_df, new_row], ignore_index=True)
-                            component_df = component_df.sort_values("changeout_date")
-                        else:
-                            should_break = True
-                            print(f"No se pudo agregar componente.")
-                            break
+                                new_row["arrival_status"] = "unconfirmed"
+                                available_slot = self.find_most_time_unchanged_slot(
+                                    available_slots_df, changeout["changeout_date"]
+                                )
+                                new_row["pool_slot"] = available_slot["pool_slot"]
+
+                            else:
+                                should_break = True
+                                print(f"No se pudo agregar componente.")
+                                break
+                        new_row = pd.DataFrame([new_row])
+                        new_row = add_arrival_date_proj(new_row)
+                        component_df = pd.concat([component_df, new_row], ignore_index=True)
+                        component_df = component_df.sort_values("changeout_date")
+
                     if should_break:
                         break
                 print("\n")
@@ -289,10 +294,6 @@ class ComponentAllocation:
         df = df.drop(columns="changeout_date_proj").reset_index(drop=True)
 
         df = add_arrival_date_proj(df)
-        # Para componentes en espera, forzar una fecha de proyección más grande con el fin de blockearlos esa linea del pool
-        df = df.assign(
-            arrival_date=np.where(df["pool_changeout_type"] == "E", df["arrival_date_proj"], df["arrival_date"])
-        )
 
         # Los que no fecha llegada asignada en la planilla base son proyecciones, no llegadas reales
         df = df.assign(arrival_status=np.where(df["arrival_date"].isnull(), "unconfirmed", "historical"))
@@ -302,18 +303,43 @@ class ComponentAllocation:
     def get_missing_changeouts(self) -> pd.DataFrame:
 
         merge_columns = ["equipo", "component", "component_serial", "changeout_week"]
-        df = self.cc_df[self.cc_df["changeout_date"] >= CHANGEOUT_START_DATE]
+        df = self.cc_df[self.cc_df["changeout_date"] >= CHANGEOUT_START_DATE][
+            [
+                "equipo",
+                "component",
+                "subcomponent",
+                "changeout_date",
+                "changeout_week",
+                "pool_changeout_type",
+                "component_hours",
+                "component_serial",
+            ]
+        ]
         df = df[df["pool_changeout_type"] != "N"]
 
         df = pd.merge(df, self.pool_proj_df[merge_columns], on=merge_columns, how="left", indicator=True)
         df = df[df["_merge"] == "left_only"].drop(columns="_merge")
         df["pool_changeout_type"] = df["pool_changeout_type"].fillna("P")
+
+        df = df.sort_values(["component", "changeout_date"]).reset_index(drop=True)
+
+        df = pd.merge(
+            df,
+            self.blocked_lanes,
+            how="outer",
+            on=["component", "equipo", "changeout_date"],
+            validate="m:1",
+        )
+        df = df.assign(
+            pool_changeout_type=np.where(df["pool_slot"].notnull(), "E", df["pool_changeout_type"]),
+            changeout_week=df["changeout_date"].dt.strftime("%G-W%V"),
+            # arrival_week=df["arrival_date"].dt.strftime("%G-W%V"),
+        )
+        assert df.loc[df["pool_changeout_type"] == "E"].shape[0] == self.blocked_lanes.shape[0]
+
         return df
 
     def generate_pool_projection(self) -> pd.DataFrame:
-
-        self.missing_cc_df = self.get_missing_changeouts()
-        self.pool_slots_df = self.get_base_pool_slots()
 
         df = self.allocate_components()
 
