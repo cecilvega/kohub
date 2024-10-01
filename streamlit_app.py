@@ -9,7 +9,7 @@ from collections import defaultdict
 st.set_page_config(layout="wide", page_icon="🚜")  # page_title="DevOps", page_icon=":bar_chart:",
 if "role" not in st.session_state:
     st.session_state.role = None
-ROLES = {"Komatsu": ["derek"], "BHP": ["mel"]}
+ROLES = {"Komatsu": ["derek", "francisco"], "BHP": ["mel"]}
 
 
 def get_password_hash(password):
@@ -117,13 +117,12 @@ komatsu_home = st.Page(
 
 
 pool_projection = st.Page("pages/planification/poolkch.py", title="Pool KCH")  # , icon=":material/dashboard:"
-component_changeouts = st.Page("pages/komatsu/component_changeouts.py", title="Cambios de Componente")
-hse_3d = st.Page("pages/hse/3d.py", title="3D")  # , icon=":material/dashboard:"
+spence = st.Page("pages/komatsu/Spence.py", title="Spence")
 
 # settings
 account_pages = [logout_page]
 bhp_pages = [bhp_home, pool_projection]
-komatsu_pages = [komatsu_home, component_changeouts, hse_3d]
+komatsu_pages = [komatsu_home, spence]
 
 st.title("MEL")
 st.logo(
