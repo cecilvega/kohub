@@ -1,0 +1,499 @@
+Date,sistema,subsistema,modo_falla,indisponibilidad,frecuencia
+2024-04-29,Autonomía,Conjunto ODS,ODS (Object Detection System) Faults,2.23,1
+2024-04-29,Autonomía,Evaluación,Multiple Alarms,12.26,3
+2024-04-29,Autonomía,GNSS,Communication Loss,7.65,1
+2024-04-29,Autonomía,GNSS,GNSS System Failure,7.5600000000000005,6
+2024-04-29,Autonomía,GNSS,Otros,2.9,1
+2024-04-29,Autonomía,Itrack,Otros,0.22,1
+2024-04-29,Autonomía,Itrack,iTrack System Issues,3.41,2
+2024-04-29,Autonomía,Modulo interfaz,Gyroscope Malfunction,3.2,1
+2024-04-29,Autonomía,Modulo interfaz,Interface Module Errors,0.23,1
+2024-04-29,Estructura,Subframe,Fisura en subframe,54.64,5
+2024-04-29,Estructura,Subframe,Problema en cabina,12.0,1
+2024-04-29,Lubricación,Fuga,Fuga de lubricante,0.65,1
+2024-04-29,Motor,Evaluación,Fallas en sistema de control,2.64,1
+2024-04-29,Motor,Filtro,Fallas en sistema de combustible,5.74,2
+2024-04-29,Motor,Refrigerante,"Fallas por manguillos, abrazaderas y flexibles",1.66,1
+2024-04-29,Neumático,Neumático,Baja presión,10.3,8
+2024-04-29,Neumático,Neumático,Falla de sistema de monitoreo,6.14,2
+2024-04-29,Neumático,Neumático,Inspección programada,3.17,1
+2024-04-29,Neumático,Neumático,Otros,6.77,1
+2024-04-29,Neumático,Neumático,Rotación inadecuada,5.01,2
+2024-04-29,Neumático,Neumático,Torque inadecuado,5.18,6
+2024-04-29,Sistema Eléctrico,24 volt.,Registro de código de falla en panel AID,0.89,1
+2024-04-29,Sistema Eléctrico,24 volt.,Sin partida,0.58,1
+2024-04-29,Sistema Eléctrico,Conector,Sin partida,0.3,1
+2024-04-29,Sistema Eléctrico,Otros,Registro de código de falla en panel AID,3.83,2
+2024-04-29,Sistema Hidráulico,Acumulador,Baja presión en sistema de dirección,6.3,4
+2024-04-29,Sistema Hidráulico,Dirección y Freno,Fuga de aceite hidráulico,5.68,2
+2024-04-29,Sistema Hidráulico,Dirección y Freno,Problemas de sensores,2.78,1
+2024-04-29,Sistema Hidráulico,Filtro,Restricción en filtros,1.54,1
+2024-04-29,Sistema Hidráulico,Frenos,Fallo en sistema de frenos,6.09,1
+2024-04-29,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,2.33,3
+2024-04-29,Sistema Hidráulico,Suspensión,Problemas en suspensión,3.34,1
+2024-05-06,Autonomía,AHS,Otros,7.58,2
+2024-05-06,Autonomía,Conjunto ODS,ODS (Object Detection System) Faults,21.86,3
+2024-05-06,Autonomía,Conjunto ODS,Otros,3.96,1
+2024-05-06,Autonomía,Evaluación,Otros,0.47,1
+2024-05-06,Autonomía,Gyroscopio,Multiple Alarms,4.45,1
+2024-05-06,Autonomía,Itrack,Otros,6.06,1
+2024-05-06,Autonomía,Neumático,GNSS System Failure,1.27,1
+2024-05-06,Autonomía,Neumático,ODS (Object Detection System) Faults,2.37,1
+2024-05-06,Estructura,Accidente,Problema en escalera,3.94,1
+2024-05-06,Estructura,Chasis,Fisura en estructura general,37.77,4
+2024-05-06,Estructura,Mantención,Fisura en estructura general,21.880000000000003,2
+2024-05-06,Estructura,Puerta,Falla en puerta,3.96,1
+2024-05-06,Estructura,Tolva,Fisura en estructura general,4.8,2
+2024-05-06,Estructura,Tolva,Otros,0.77,1
+2024-05-06,Motor,Aceite,Rellenos de aceite,5.27,1
+2024-05-06,Motor,Combustible,Fallas en sistema de combustible,11.33,2
+2024-05-06,Motor,Evaluación,Otros,0.73,1
+2024-05-06,Motor,Filtro,Fallas en sistema de combustible,0.83,1
+2024-05-06,Motor,Filtro aire,Fallas en sistema de combustible,0.16,1
+2024-05-06,Motor,Inducción de Aire y Escape,Otros,3.52,1
+2024-05-06,Motor,Mantención,Desgaste de componentes internos,15.3,2
+2024-05-06,Neumático,Neumático,Baja presión,7.23,4
+2024-05-06,Neumático,Neumático,Daño por impacto,47.18,5
+2024-05-06,Neumático,Neumático,Desgaste anormal,6.91,1
+2024-05-06,Neumático,Neumático,Rotación inadecuada,25.64,4
+2024-05-06,Neumático,Neumático,Torque inadecuado,2.38,4
+2024-05-06,Sistema Eléctrico,24 volt.,Falla en sensores,3.16,1
+2024-05-06,Sistema Eléctrico,24 volt.,Otros,3.9299999999999997,2
+2024-05-06,Sistema Eléctrico,24 volt.,Sin partida,2.3099999999999996,2
+2024-05-06,Sistema Eléctrico,Sin propulsión,Otros,1.46,1
+2024-05-06,Sistema Eléctrico,Sin propulsión,Problemas en componentes electrónicos,1.15,1
+2024-05-06,Sistema Eléctrico,Switch,Sin partida,1.93,1
+2024-05-06,Sistema Hidráulico,Acumulador,Baja presión en sistema de dirección,3.65,1
+2024-05-06,Sistema Hidráulico,Bajo nivel,Fuga de aceite hidráulico,0.14,1
+2024-05-06,Sistema Hidráulico,Freno,Fallo en sistema de frenos,1.74,1
+2024-05-06,Sistema Hidráulico,Freno Estacionamiento,Fuga de aceite hidráulico,3.24,1
+2024-05-06,Sistema Hidráulico,Relleno,Fuga de aceite hidráulico,4.98,2
+2024-05-06,Sistema Propulsión,Blower,Flashover en blower de parrillas,2.65,1
+2024-05-06,Sistema Propulsión,Evaluación,Otros,0.54,1
+2024-05-13,Autonomía,Conjunto ODS,Otros,5.49,1
+2024-05-13,Autonomía,GNSS,GNSS System Failure,0.46,1
+2024-05-13,Autonomía,Itrack,Otros,1.02,1
+2024-05-13,Autonomía,Mantención,Autonomous Mode Activation Failure,15.53,2
+2024-05-13,Autonomía,Modulo interfaz,Interface Module Errors,7.03,2
+2024-05-13,Autonomía,Neumático,Otros,3.94,1
+2024-05-13,Estructura,Baranda,Falla en sistema de seguridad,0.7,1
+2024-05-13,Estructura,Baranda,Problema en baranda,1.79,1
+2024-05-13,Estructura,Mantención,Problema en escalera,1.31,1
+2024-05-13,Estructura,Tolva,Otros,10.64,1
+2024-05-13,Lubricación,Relleno,Baja presión de lubricación,11.15,1
+2024-05-13,Motor,Cambio UF,Otros,12.0,1
+2024-05-13,Motor,Combustible,Fallas en sistema de combustible,2.33,1
+2024-05-13,Motor,Combustible,Fallas en sistema de inducción y escape,2.47,1
+2024-05-13,Motor,Culata,Otros,20.240000000000002,2
+2024-05-13,Motor,Evaluación,Fallas en sistema de control,8.71,2
+2024-05-13,Motor,Inducción de Aire y Escape,"Fallas por manguillos, abrazaderas y flexibles",20.759999999999998,2
+2024-05-13,Motor,Mantención,Fallas eléctricas,3.52,1
+2024-05-13,Motor,Refrigerante,"Fallas por manguillos, abrazaderas y flexibles",2.43,1
+2024-05-13,Motor,Relleno,Fallas en sistema de control,0.78,1
+2024-05-13,Motor,Relleno,Fallas en sistema de lubricación,10.78,1
+2024-05-13,Motor,Relleno,Rellenos de aceite,3.8,2
+2024-05-13,Motor,Termocuplas,Otros,12.0,1
+2024-05-13,Motor,relleno,Rellenos de aceite,1.66,1
+2024-05-13,Neumático,Neumático,Baja presión,6.17,7
+2024-05-13,Neumático,Neumático,Desgaste anormal,0.19,1
+2024-05-13,Neumático,Neumático,Otros,33.01,6
+2024-05-13,Neumático,Neumático,Rotación inadecuada,18.34,3
+2024-05-13,Neumático,Neumático,Torque inadecuado,1.8599999999999999,2
+2024-05-13,Sistema Eléctrico,24 volt.,Falla en luces,7.31,1
+2024-05-13,Sistema Eléctrico,24 volt.,Otros,7.82,1
+2024-05-13,Sistema Eléctrico,24 volt.,Registro de código de falla en panel AID,12.73,3
+2024-05-13,Sistema Eléctrico,24 volt.,Sin partida,2.58,1
+2024-05-13,Sistema Eléctrico,Luces,Falla en luces,1.36,1
+2024-05-13,Sistema Eléctrico,Sistema partida,Sin partida,2.87,2
+2024-05-13,Sistema Hidráulico,Frenos,Otros,0.34,1
+2024-05-13,Sistema Hidráulico,Fuga,Otros,3.57,1
+2024-05-13,Sistema Hidráulico,Mantención,Fallas en líneas hidráulicas,0.64,1
+2024-05-13,Sistema Hidráulico,Relleno,Fallas en sistema de elevación de tolva,1.26,1
+2024-05-13,Sistema Hidráulico,Suspensión,Problemas en suspensión,13.91,2
+2024-05-13,Sistema Propulsión,MT,Desgaste de componentes internos del motor de tracción,21.57,2
+2024-05-13,Sistema Propulsión,MT,Fuga de aceite en motor de tracción,1.07,1
+2024-05-13,Sistema Propulsión,MT,Otros,25.07,3
+2024-05-20,Autonomía,Autonomía,Otros,2.62,1
+2024-05-20,Autonomía,Autonomía,Power/Propulsion Issues,2.59,1
+2024-05-20,Autonomía,GNSS,Laser Navigation Errors,4.59,1
+2024-05-20,Autonomía,PTX,Otros,6.54,1
+2024-05-20,Estructura,Bota Piedra,Caída de bota piedra,7.86,1
+2024-05-20,Estructura,Bota Piedra,Otros,0.68,1
+2024-05-20,Estructura,Escalera,Problema en escalera,1.9,1
+2024-05-20,Estructura,Tolva,Problema con letreros,0.49,1
+2024-05-20,Motor,Arnes,Fallas eléctricas,4.17,1
+2024-05-20,Motor,Cambio UF,Otros,4.64,1
+2024-05-20,Motor,Combustible,Fallas en sistema de inducción y escape,4.53,1
+2024-05-20,Motor,Evaluación,Fallas en sistema de control,3.4,2
+2024-05-20,Motor,Módulo de potencia,Otros,12.0,1
+2024-05-20,Motor,Refrigerante,Fallas en sistema de refrigeración,8.24,1
+2024-05-20,Motor,Sistema eléctrico,Fallas eléctricas,2.54,1
+2024-05-20,Neumático,Neumático,Baja presión,14.74,4
+2024-05-20,Neumático,Neumático,Daño por impacto,2.1,1
+2024-05-20,Neumático,Neumático,Desgaste anormal,0.29,1
+2024-05-20,Neumático,Neumático,Inspección programada,6.8,5
+2024-05-20,Neumático,Neumático,Otros,1.95,1
+2024-05-20,Neumático,Neumático,Rotación inadecuada,13.84,3
+2024-05-20,Neumático,Neumático,Torque inadecuado,2.02,5
+2024-05-20,Sistema Eléctrico,Sensor,Problemas con la tolva,6.74,2
+2024-05-20,Sistema Eléctrico,Sistema partida,Sin partida,1.83,1
+2024-05-20,Sistema Hidráulico,Acumulador,Baja presión en sistema de dirección,4.26,2
+2024-05-20,Sistema Hidráulico,Acumulador,Otros,2.43,1
+2024-05-20,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,2.47,1
+2024-05-20,Sistema Hidráulico,Fuga,Otros,0.98,1
+2024-05-20,Sistema Hidráulico,Relleno,Otros,5.36,1
+2024-05-20,Sistema Hidráulico,Suspensión delantera,Problemas en suspensión,3.83,1
+2024-05-20,Sistema Propulsión,Blower,Falla en sistema de parrillas,3.35,1
+2024-05-20,Sistema Propulsión,Blower,Flashover en blower de parrillas,2.16,1
+2024-05-20,Sistema Propulsión,MT,Desgaste de componentes internos del motor de tracción,12.0,1
+2024-05-20,Sistema Propulsión,MT,Fuga de aceite en motor de tracción,0.47,1
+2024-05-20,Sistema Propulsión,MT,Otros,18.6,3
+2024-05-20,Sistema Propulsión,Parrillas,Falla en sistema de parrillas,2.18,1
+2024-05-27,Autonomía,GNSS,GNSS System Failure,5.22,2
+2024-05-27,Autonomía,Gyroscopio,Gyroscope Malfunction,4.74,1
+2024-05-27,Autonomía,Modulo interfaz,Interface Module Errors,9.33,3
+2024-05-27,Estructura,Escalera,Problema en escalera,3.39,1
+2024-05-27,Estructura,Puerta emergencia,Falla en puerta,1.18,1
+2024-05-27,Estructura,Sub-Frame,Fisura en estructura general,12.42,2
+2024-05-27,Estructura,Tecnología,Fisura en tolva,10.88,1
+2024-05-27,Estructura,Tolva,Fisura en tolva,17.64,2
+2024-05-27,Motor,Aceite,Fallas en sistema de control,0.81,2
+2024-05-27,Motor,Evaluación,Fallas en sistema de control,3.51,2
+2024-05-27,Motor,Refrigerante,Fallas en sistema de refrigeración,0.92,1
+2024-05-27,Motor,Unidadad de fuerza,Otros,6.39,1
+2024-05-27,Neumático,Neumático,Baja presión,9.84,6
+2024-05-27,Neumático,Neumático,Falla de sistema de monitoreo,6.25,1
+2024-05-27,Neumático,Neumático,Inspección programada,4.41,1
+2024-05-27,Neumático,Neumático,Otros,12.26,2
+2024-05-27,Neumático,Neumático,Rotación inadecuada,6.59,1
+2024-05-27,Neumático,Neumático,Torque inadecuado,1.46,3
+2024-05-27,Sistema Eléctrico,24 volt.,Sin partida,0.36,1
+2024-05-27,Sistema Eléctrico,Sensor,Falla en sensores,10.24,2
+2024-05-27,Sistema Eléctrico,Sensor,Problemas con la tolva,0.6,2
+2024-05-27,Sistema Hidráulico,Acumulador,Otros,3.3,1
+2024-05-27,Sistema Hidráulico,Dirección y Freno,Otros,2.06,1
+2024-05-27,Sistema Hidráulico,Frenos,Fallo en sistema de frenos,3.28,1
+2024-05-27,Sistema Hidráulico,Frenos,Fallo en válvulas,1.36,1
+2024-05-27,Sistema Hidráulico,Frenos,Fuga de aceite hidráulico,5.16,1
+2024-05-27,Sistema Hidráulico,Fuga,Fallas en líneas hidráulicas,2.11,1
+2024-05-27,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,3.44,2
+2024-05-27,Sistema Hidráulico,Relleno,Fuga de aceite hidráulico,4.73,1
+2024-05-27,Sistema Propulsión,Blower,Flashover en blower de parrillas,2.29,1
+2024-05-27,Sistema Propulsión,MT,Fuga de aceite en motor de tracción,3.64,1
+2024-06-03,Autonomía,GNSS,Communication Loss,3.51,1
+2024-06-03,Autonomía,GNSS,GNSS System Failure,4.09,1
+2024-06-03,Autonomía,GNSS,Otros,9.89,4
+2024-06-03,Autonomía,Gyroscopio,Otros,21.380000000000003,4
+2024-06-03,Autonomía,Modulo interfaz,Interface Module Errors,8.19,1
+2024-06-03,Autonomía,Parada de emergencia,Emergency Stop Activation,2.4,1
+2024-06-03,Autonomía,Sofware,Otros,12.0,1
+2024-06-03,Estructura,Accidente,Problema en escalera,0.27,1
+2024-06-03,Estructura,Cabina,Falla en puerta,1.84,1
+2024-06-03,Estructura,Cabina,Otros,1.23,1
+2024-06-03,Estructura,Cabina,Problema en cabina,0.62,1
+2024-06-03,Estructura,Chasis,Fisura en soporte,12.0,1
+2024-06-03,Estructura,Espejo,Problema en espejo,1.44,1
+2024-06-03,Estructura,Soporte,Fisura en soporte,29.029999999999998,5
+2024-06-03,Estructura,Tolva,Fisura en tolva,12.18,2
+2024-06-03,Motor,Evaluación,Fallas en sistema de control,5.05,1
+2024-06-03,Motor,Midlife,Desgaste de componentes internos,2.72,1
+2024-06-03,Motor,Módulo de potencia,"Fallas por manguillos, abrazaderas y flexibles",9.0,1
+2024-06-03,Motor,Módulo de potencia,Otros,67.74,6
+2024-06-03,Motor,Refrigerante,"Fallas por manguillos, abrazaderas y flexibles",2.27,1
+2024-06-03,Motor,Relleno,Fallas en sistema de refrigeración,1.92,1
+2024-06-03,Motor,Relleno,Rellenos de aceite,2.1799999999999997,2
+2024-06-03,Motor,Sistema eléctrico,Fallas eléctricas,12.0,1
+2024-06-03,Neumático,Neumático,Baja presión,6.41,4
+2024-06-03,Neumático,Neumático,Daño por impacto,26.6,3
+2024-06-03,Neumático,Neumático,Desgaste anormal,30.79,6
+2024-06-03,Neumático,Neumático,Inspección programada,2.36,1
+2024-06-03,Neumático,Neumático,Rotación inadecuada,20.44,4
+2024-06-03,Sistema Eléctrico,Luz Señalización,Registro de código de falla en panel AID,2.32,1
+2024-06-03,Sistema Eléctrico,Potenciometro,Problemas en componentes electrónicos,8.86,1
+2024-06-03,Sistema Eléctrico,Rele,Registro de código de falla en panel AID,2.25,1
+2024-06-03,Sistema Eléctrico,Sensor,Falla en sensores,2.16,1
+2024-06-03,Sistema Eléctrico,Sensor,Problemas con la tolva,2.98,2
+2024-06-03,Sistema Hidráulico,Acumulador,Baja presión en sistema de dirección,8.379999999999999,2
+2024-06-03,Sistema Hidráulico,Frenos,Fallo en sistema de frenos,2.5,1
+2024-06-03,Sistema Hidráulico,Frenos,Otros,1.41,1
+2024-06-03,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,6.4,3
+2024-06-03,Sistema Hidráulico,Relleno,Fuga de aceite hidráulico,2.97,1
+2024-06-03,Sistema Hidráulico,Suspensión,Problemas en suspensión,16.07,2
+2024-06-03,Sistema Hidráulico,Suspensión trasera,Problemas en suspensión,11.76,1
+2024-06-03,Sistema Propulsión,MT,Fuga de aceite en motor de tracción,0.4,1
+2024-06-03,Sistema Propulsión,MT,Otros,0.34,1
+2024-06-10,Autonomía,Conjunto ODS,Laser Navigation Errors,9.7,1
+2024-06-10,Autonomía,Conjunto ODS,ODS (Object Detection System) Faults,5.62,1
+2024-06-10,Autonomía,GNSS,Communication Loss,1.2,1
+2024-06-10,Autonomía,Itrack,Otros,0.42,1
+2024-06-10,Autonomía,Itrack,iTrack System Issues,1.67,1
+2024-06-10,Estructura,Barra estabilizadora,Falla en barra estabilizadora,39.53,4
+2024-06-10,Estructura,Bota Piedra,Caída de bota piedra,2.11,1
+2024-06-10,Motor,Filtro aire,Fallas en sistema de combustible,3.62,1
+2024-06-10,Motor,Sensor,Fallas eléctricas,0.38,1
+2024-06-10,Neumático,Neumático,Baja presión,14.55,5
+2024-06-10,Neumático,Neumático,Daño por impacto,6.199999999999999,2
+2024-06-10,Neumático,Neumático,Falla de sistema de monitoreo,8.16,3
+2024-06-10,Neumático,Neumático,Inspección programada,18.9,2
+2024-06-10,Neumático,Neumático,Otros,0.39,1
+2024-06-10,Neumático,Neumático,Rotación inadecuada,19.71,4
+2024-06-10,Sistema Eléctrico,24 volt.,Registro de código de falla en panel AID,3.6,1
+2024-06-10,Sistema Eléctrico,24 volt.,Sin partida,6.3,1
+2024-06-10,Sistema Eléctrico,Sistema partida,Sin partida,2.25,3
+2024-06-10,Sistema Hidráulico,Acumulador,Otros,1.3,1
+2024-06-10,Sistema Hidráulico,Dirección,Otros,4.94,1
+2024-06-10,Sistema Hidráulico,Frenos,Fuga de aceite hidráulico,2.16,1
+2024-06-10,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,8.45,2
+2024-06-10,Sistema Hidráulico,Suspensión,Problemas en suspensión,4.3,1
+2024-06-10,Sistema Hidráulico,Suspensión trasera,Problemas en suspensión,24.0,2
+2024-06-10,Sistema Propulsión,MT,Otros,1.31,1
+2024-06-17,Autonomía,Arnés,Laser Navigation Errors,14.11,3
+2024-06-17,Autonomía,Autonomía,Power/Propulsion Issues,30.84,1
+2024-06-17,Autonomía,Conjunto ODS,Power/Propulsion Issues,1.9,1
+2024-06-17,Autonomía,Conjunto ODS,Suspension System Faults,7.55,2
+2024-06-17,Autonomía,Evaluación,Autonomous Mode Activation Failure,1.36,1
+2024-06-17,Autonomía,Evaluación,Otros,1.07,1
+2024-06-17,Autonomía,GNSS,Otros,10.33,1
+2024-06-17,Estructura,Bota piedra,Caída de bota piedra,1.93,1
+2024-06-17,Estructura,Tolva,Fisura en estructura general,32.11,4
+2024-06-17,Motor,Bomba combustible,Fallas eléctricas,3.68,1
+2024-06-17,Motor,Evaluación,Fallas en sistema de control,2.09,1
+2024-06-17,Motor,Refrigerante,"Fallas por manguillos, abrazaderas y flexibles",7.6,2
+2024-06-17,Motor,Relleno,Fallas en sistema de lubricación,1.14,1
+2024-06-17,Motor,Relleno,"Fallas por manguillos, abrazaderas y flexibles",5.01,2
+2024-06-17,Motor,Sensor,Fallas eléctricas,8.66,1
+2024-06-17,Motor,Sistema eléctrico,Fallas eléctricas,18.009999999999998,2
+2024-06-17,Neumático,Neumático,Baja presión,46.17,9
+2024-06-17,Neumático,Neumático,Daño por impacto,4.53,1
+2024-06-17,Neumático,Neumático,Desgaste anormal,4.32,1
+2024-06-17,Neumático,Neumático,Inspección programada,25.83,3
+2024-06-17,Neumático,Neumático,Otros,3.16,2
+2024-06-17,Neumático,Neumático,Rotación inadecuada,8.379999999999999,2
+2024-06-17,Neumático,Neumático,Torque inadecuado,0.48,1
+2024-06-17,Sistema Eléctrico,24 volt.,Falla en sensores,1.85,1
+2024-06-17,Sistema Eléctrico,24 volt.,Registro de código de falla en panel AID,6.27,2
+2024-06-17,Sistema Eléctrico,Arnés,Otros,5.62,1
+2024-06-17,Sistema Eléctrico,Luces,Falla en luces,2.88,1
+2024-06-17,Sistema Eléctrico,Sensor,Falla en sensores,8.68,1
+2024-06-17,Sistema Eléctrico,Sensor,Registro de código de falla en panel AID,3.7199999999999998,2
+2024-06-17,Sistema Eléctrico,Sistema partida,Sin partida,61.96,11
+2024-06-17,Sistema Hidráulico,Acumulador,Baja presión en sistema de dirección,3.46,1
+2024-06-17,Sistema Hidráulico,Acumulador,Otros,5.04,1
+2024-06-17,Sistema Hidráulico,Contaminación,Contaminación del sistema,4.66,1
+2024-06-17,Sistema Hidráulico,Dirección y freno,Problemas en bombas,4.96,1
+2024-06-17,Sistema Hidráulico,Fuga,Fallas en líneas hidráulicas,0.08,1
+2024-06-17,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,4.27,3
+2024-06-17,Sistema Hidráulico,Relleno,Otros,3.14,1
+2024-06-17,Sistema Hidráulico,Suspensión trasera,Problemas en suspensión,12.0,1
+2024-06-17,Sistema Propulsión,Alternador Principal,Falla reiteradas en alternadores principales,1.02,1
+2024-06-17,Sistema Propulsión,MT,Otros,0.66,1
+2024-06-24,Autonomía,Conjunto ODS,Otros,12.0,1
+2024-06-24,Autonomía,Evaluación,Autonomous Mode Activation Failure,12.0,1
+2024-06-24,Autonomía,GNSS,Otros,15.99,2
+2024-06-24,Estructura,Bota piedra,Caída de bota piedra,1.28,1
+2024-06-24,Estructura,Letreros,Problema con letreros,0.31,1
+2024-06-24,Estructura,Puerta emergencia,Otros,1.36,1
+2024-06-24,Estructura,Tolva,Fisura en estructura general,18.55,2
+2024-06-24,Motor,After cooler,"Fallas por manguillos, abrazaderas y flexibles",4.84,1
+2024-06-24,Motor,Enfriamiento,"Fallas por manguillos, abrazaderas y flexibles",6.4,1
+2024-06-24,Motor,Evaluación,Fallas en sistema de control,2.69,1
+2024-06-24,Motor,Relleno,Fallas en sistema de refrigeración,0.34,1
+2024-06-24,Motor,Sensor,Fallas eléctricas,15.45,2
+2024-06-24,Motor,Sistema eléctrico,Fallas eléctricas,6.779999999999999,3
+2024-06-24,Motor,Termocuplas,Otros,6.550000000000001,2
+2024-06-24,Neumático,Neumático,Baja presión,1.93,1
+2024-06-24,Neumático,Neumático,Daño por impacto,3.25,1
+2024-06-24,Neumático,Neumático,Otros,1.6,1
+2024-06-24,Neumático,Neumático,Rotación inadecuada,18.32,2
+2024-06-24,Neumático,Neumático,Torque inadecuado,2.98,5
+2024-06-24,Sistema Eléctrico,24 volt.,Falla en sensores,1.24,1
+2024-06-24,Sistema Eléctrico,24 volt.,Registro de código de falla en panel AID,53.51,5
+2024-06-24,Sistema Eléctrico,Gabinete 24volt,Falla en sistema de 24 voltios,4.37,1
+2024-06-24,Sistema Eléctrico,Luces,Falla en luces,1.8,1
+2024-06-24,Sistema Eléctrico,Sensor,Problemas con la tolva,4.63,1
+2024-06-24,Sistema Eléctrico,Sistema partida,Sin partida,1.3199999999999998,4
+2024-06-24,Sistema Hidráulico,Acumulador,Otros,12.0,1
+2024-06-24,Sistema Hidráulico,Fuga,Otros,2.44,1
+2024-06-24,Sistema Propulsión,Blower,Flashover en blower de parrillas,6.73,2
+2024-06-24,Sistema Propulsión,MT,Otros,3.38,2
+2024-07-01,Autonomía,GNSS,GNSS System Failure,12.89,2
+2024-07-01,Autonomía,Modulo interfaz,Multiple Alarms,4.63,1
+2024-07-01,Estructura,Accidente,Problema en baranda,8.57,1
+2024-07-01,Estructura,Cabina,Falla en puerta,2.02,1
+2024-07-01,Estructura,Tolva,Fisura en tolva,51.3,6
+2024-07-01,Motor,After cooler,"Fallas por manguillos, abrazaderas y flexibles",2.45,1
+2024-07-01,Motor,Combustible,Fallas eléctricas,2.92,1
+2024-07-01,Motor,Combustible,"Fallas por manguillos, abrazaderas y flexibles",2.44,1
+2024-07-01,Motor,Culata,Fallas en culatas (válvulas/asiento),70.58,6
+2024-07-01,Motor,Culata,Otros,12.0,1
+2024-07-01,Motor,Eléctrico,Fallas eléctricas,10.44,1
+2024-07-01,Motor,Evaluación,Fallas en sistema de control,1.26,1
+2024-07-01,Motor,Relleno,Fallas en sistema de refrigeración,4.15,2
+2024-07-01,Módulo de potencia,Módulo de potencia,Falla del arnés eléctrico,114.82,10
+2024-07-01,Neumático,Neumático,Baja presión,24.98,8
+2024-07-01,Neumático,Neumático,Desgaste anormal,6.01,1
+2024-07-01,Neumático,Neumático,Inspección programada,4.65,2
+2024-07-01,Neumático,Neumático,Otros,30.799999999999997,4
+2024-07-01,Neumático,Neumático,Rotación inadecuada,7.66,2
+2024-07-01,Sistema Eléctrico,Antena,Golpe por elemento extraño en arnés,0.79,1
+2024-07-01,Sistema Eléctrico,Arnes,Falla en sistema de 24 voltios,24.0,2
+2024-07-01,Sistema Eléctrico,Gabinete 24volt,Falla en sistema de 24 voltios,41.25,4
+2024-07-01,Sistema Eléctrico,Sistema partida,Sin partida,7.450000000000001,2
+2024-07-01,Sistema Hidráulico,Acumulador,Baja presión en sistema de dirección,1.6,1
+2024-07-01,Sistema Hidráulico,Acumulador,Problemas en acumuladores,5.55,1
+2024-07-01,Sistema Hidráulico,Dirección,Fuga de aceite hidráulico,2.05,1
+2024-07-01,Sistema Hidráulico,Frenos,Otros,1.28,1
+2024-07-01,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,0.69,1
+2024-07-01,Sistema Propulsión,Blower,Flashover en blower de parrillas,11.99,2
+2024-07-08,Autonomía,Conjunto ODS,Laser Navigation Errors,15.34,2
+2024-07-08,Autonomía,Conjunto ODS,Otros,5.19,2
+2024-07-08,Autonomía,GNSS,GNSS System Failure,3.74,1
+2024-07-08,Autonomía,GNSS,Otros,20.869999999999997,3
+2024-07-08,Autonomía,Itrack,iTrack System Issues,0.56,1
+2024-07-08,Estructura,Bota piedra,Otros,2.36,1
+2024-07-08,Estructura,Espejo,Otros,0.4,1
+2024-07-08,Estructura,Pernos,Otros,0.47,1
+2024-07-08,Estructura,Tolva,Fisura en estructura general,18.38,2
+2024-07-08,Motor,24 volt.,Fallas en sistema de control,31.77,2
+2024-07-08,Motor,Midlife,Desgaste de componentes internos,20.509999999999998,2
+2024-07-08,Motor,Midlife,Fallas en sistema de combustible,12.0,1
+2024-07-08,Motor,Motor,Fallas en culatas (válvulas/asiento),4.72,1
+2024-07-08,Motor,Relleno,Fallas en sistema de refrigeración,1.93,1
+2024-07-08,Motor,Sistema eléctrico,Fallas eléctricas,14.62,2
+2024-07-08,Neumático,Neumático,Baja presión,12.94,6
+2024-07-08,Neumático,Neumático,Falla de sistema de monitoreo,27.29,1
+2024-07-08,Neumático,Neumático,Inspección programada,6.25,1
+2024-07-08,Neumático,Neumático,Otros,0.84,1
+2024-07-08,Neumático,Neumático,Rotación inadecuada,2.22,1
+2024-07-08,Neumático,Neumático,Torque inadecuado,2.55,3
+2024-07-08,Sistema Eléctrico,24 volt.,Otros,3.92,2
+2024-07-08,Sistema Eléctrico,Sin propulsión,Problemas en componentes electrónicos,2.29,1
+2024-07-08,Sistema Eléctrico,Sistema partida,Otros,0.28,1
+2024-07-08,Sistema Eléctrico,Sistema partida,Sin partida,0.31,1
+2024-07-08,Sistema Hidráulico,Acumulador,Baja presión en sistema de dirección,3.62,1
+2024-07-08,Sistema Hidráulico,Freno Estacionamiento,Otros,15.07,3
+2024-07-08,Sistema Hidráulico,Frenos,Fallo en sistema de frenos,1.45,1
+2024-07-08,Sistema Hidráulico,MT,Otros,4.4,1
+2024-07-08,Sistema Hidráulico,Relleno,Fuga de aceite hidráulico,0.67,1
+2024-07-15,Autonomía,Arnes,Otros,2.92,1
+2024-07-15,Autonomía,Evaluación,Otros,3.64,1
+2024-07-15,Autonomía,GNSS,Communication Loss,3.53,1
+2024-07-15,Autonomía,GNSS,Multiple Alarms,2.23,1
+2024-07-15,Autonomía,Modulo interfaz,Interface Module Errors,11.89,2
+2024-07-15,Estructura,Bota piedra,Caída de bota piedra,27.27,1
+2024-07-15,Estructura,Bota piedra,Otros,4.62,1
+2024-07-15,Estructura,Letreros,Falla en sistema de seguridad,0.73,1
+2024-07-15,Estructura,Puerta,Otros,0.35,1
+2024-07-15,Estructura,Tolva,Fisura en subframe,4.11,1
+2024-07-15,Motor,Aceite,Fallas en sistema de lubricación,2.03,1
+2024-07-15,Motor,Alternador 24vol.,Fallas eléctricas,2.74,1
+2024-07-15,Motor,Bomba,Fallas en sistema de combustible,31.86,3
+2024-07-15,Motor,Combustible,"Fallas por manguillos, abrazaderas y flexibles",8.6,2
+2024-07-15,Motor,Combustible,Otros,11.96,2
+2024-07-15,Motor,Ducto Escape,Fallas en sistema de control,6.72,1
+2024-07-15,Motor,Evaluación,Fallas en sistema de control,8.02,3
+2024-07-15,Motor,Relleno,Fallas en sistema de refrigeración,2.73,1
+2024-07-15,Motor,Relleno,"Fallas por manguillos, abrazaderas y flexibles",14.419999999999998,3
+2024-07-15,Motor,Sistema eléctrico,Fallas eléctricas,44.52,6
+2024-07-15,Motor,Sistema eléctrico,"Fallas por manguillos, abrazaderas y flexibles",11.05,1
+2024-07-15,Neumático,Neumático,Baja presión,11.780000000000001,5
+2024-07-15,Neumático,Neumático,Desgaste anormal,4.67,1
+2024-07-15,Neumático,Neumático,Inspección programada,25.83,3
+2024-07-15,Neumático,Neumático,Rotación inadecuada,54.81,5
+2024-07-15,Neumático,Neumático,Torque inadecuado,0.92,1
+2024-07-15,Sistema Eléctrico,24 volt.,Registro de código de falla en panel AID,1.24,1
+2024-07-15,Sistema Eléctrico,Sensor,Problemas en componentes electrónicos,1.08,1
+2024-07-15,Sistema Eléctrico,Sensor,Registro de código de falla en panel AID,5.22,1
+2024-07-15,Sistema Eléctrico,Sistema partida,Sin partida,24.38,14
+2024-07-15,Sistema Hidráulico,Bajo nivel,Otros,2.24,1
+2024-07-15,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,10.56,2
+2024-07-15,Sistema Hidráulico,Suspensión,Problemas en suspensión,73.44,8
+2024-07-15,Sistema Propulsión,Blower,Flashover en blower de parrillas,4.41,1
+2024-07-22,Autonomía,Cable,Multiple Alarms,4.52,1
+2024-07-22,Autonomía,GNSS,Communication Loss,0.15,1
+2024-07-22,Estructura,Baranda,Problema en baranda,2.22,1
+2024-07-22,Estructura,Bota piedra,Otros,8.459999999999999,2
+2024-07-22,Estructura,Chasis,Fisura en estructura general,12.0,1
+2024-07-22,Estructura,Escalera de emergencia,Otros,1.57,1
+2024-07-22,Estructura,Espejo,Problema en espejo,0.63,1
+2024-07-22,Estructura,Soporte,Fisura en chasis,24.0,2
+2024-07-22,Lubricación,Línea engrase,Fuga de lubricante,0.63,1
+2024-07-22,Motor,Combustible,Fallas en sistema de combustible,3.7,1
+2024-07-22,Motor,Combustible,"Fallas por manguillos, abrazaderas y flexibles",2.7,1
+2024-07-22,Motor,Evaluación,Fallas en sistema de control,7.38,1
+2024-07-22,Motor,Refrigerante,Fallas en culatas (válvulas/asiento),43.91,4
+2024-07-22,Motor,Relleno,Fallas en sistema de lubricación,1.81,1
+2024-07-22,Motor,Relleno,"Fallas por manguillos, abrazaderas y flexibles",3.6999999999999997,2
+2024-07-22,Motor,Sistema eléctrico,Otros,8.39,2
+2024-07-22,Neumático,Neumático,Baja presión,18.83,7
+2024-07-22,Neumático,Neumático,Desalineación,16.68,2
+2024-07-22,Neumático,Neumático,Inspección programada,14.31,2
+2024-07-22,Neumático,Neumático,Rotación inadecuada,5.84,1
+2024-07-22,Neumático,Neumático,Torque inadecuado,2.23,4
+2024-07-22,Remolque,Remolque,Falla en el sistema de acople,6.24,1
+2024-07-22,Sistema Eléctrico,Luces,Falla en luces,3.9699999999999998,2
+2024-07-22,Sistema Eléctrico,Sistema partida,Sin partida,4.54,2
+2024-07-22,Sistema Hidráulico,Freno Estacionamiento,Otros,0.32,1
+2024-07-22,Sistema Hidráulico,Fuga,Fuga de aceite hidráulico,0.99,1
+2024-07-22,Sistema Hidráulico,Relleno,Fuga de aceite hidráulico,5.57,1
+2024-07-22,Sistema Propulsión,Alternador Principal,Falla reiteradas en alternadores principales,0.17,1
+2024-07-22,Sistema Propulsión,MT,Desgaste de componentes internos del motor de tracción,12.0,1
+2024-07-29,Autonomía,Evaluación,Autonomous Mode Activation Failure,4.01,2
+2024-07-29,Autonomía,GNSS,Communication Loss,7.11,2
+2024-07-29,Autonomía,GNSS,Gyroscope Malfunction,1.49,1
+2024-07-29,Autonomía,Itrack,iTrack System Issues,3.01,1
+2024-07-29,Estructura,Bota piedra,Otros,14.49,2
+2024-07-29,Estructura,Escalera de emergencia,Otros,1.81,1
+2024-07-29,Estructura,Espejo,Problema en espejo,2.95,1
+2024-07-29,Estructura,Letreros,Otros,6.53,2
+2024-07-29,Estructura,Letreros,Problema con letreros,0.37,1
+2024-07-29,Motor,24 volt.,Fallas en sistema de control,8.73,2
+2024-07-29,Motor,Cambio Módulo,Otros,41.68,4
+2024-07-29,Motor,Combustible,Fallas en sistema de combustible,0.32,1
+2024-07-29,Motor,Eléctrico,Fallas eléctricas,2.48,1
+2024-07-29,Motor,Evaluación,Fallas en sistema de control,12.0,1
+2024-07-29,Motor,Midlife,Desgaste de componentes internos,31.75,3
+2024-07-29,Motor,Refrigerante,Fallas en culatas (válvulas/asiento),3.77,1
+2024-07-29,Módulo de potencia,Módulo de potencia,Falla del arnés eléctrico,12.0,1
+2024-07-29,Neumático,Neumático,Baja presión,5.609999999999999,5
+2024-07-29,Neumático,Neumático,Desgaste anormal,0.65,1
+2024-07-29,Neumático,Neumático,Inspección programada,17.04,2
+2024-07-29,Neumático,Neumático,Rotación inadecuada,1.21,1
+2024-07-29,Sistema Eléctrico,Sistema partida,Sin partida,8.24,1
+2024-07-29,Sistema Hidráulico,Fuga,Otros,5.7,1
+2024-07-29,Sistema Hidráulico,Suspensión,Problemas de control,9.66,1
+2024-07-29,Sistema Propulsión,Blower,Flashover en blower de parrillas,7.61,1
+2024-08-05,Autonomía,Evaluación,Otros,1.54,1
+2024-08-05,Estructura,Escalera,Falla en sistema de seguridad,2.07,1
+2024-08-05,Estructura,Letreros,Falla en sistema de seguridad,2.21,1
+2024-08-05,Estructura,Puerta emergencia,Bisagra quebrada o desoldada de puerta de emergencia,1.79,1
+2024-08-05,Estructura,Puerta emergencia,Falla en puerta,1.36,1
+2024-08-05,Estructura,Puerta emergencia,Otros,1.51,1
+2024-08-05,Estructura,Tolva,Fisura en estructura general,0.76,1
+2024-08-05,Estructura,Tolva,Fisura en soporte,9.51,1
+2024-08-05,Motor,Aceite,Fallas en sistema de lubricación,6.44,1
+2024-08-05,Motor,Aceite,"Fallas por manguillos, abrazaderas y flexibles",1.32,1
+2024-08-05,Motor,Bomba combustible,"Fallas por manguillos, abrazaderas y flexibles",20.119999999999997,2
+2024-08-05,Motor,Combustible,Fallas en sistema de control,2.9800000000000004,2
+2024-08-05,Motor,Combustible,Fallas en sistema de inducción y escape,12.17,2
+2024-08-05,Motor,Eléctrico,Fallas en sistema de control,3.86,1
+2024-08-05,Motor,Evaluación,Fallas en sistema de control,12.21,2
+2024-08-05,Motor,Mantención,Fallas en sistema de lubricación,1.88,1
+2024-08-05,Motor,Midlife,Desgaste de componentes internos,28.46,3
+2024-08-05,Motor,Refrigerante,"Fallas por manguillos, abrazaderas y flexibles",1.4,1
+2024-08-05,Motor,Relleno,Fallas en sistema de control,2.0,1
+2024-08-05,Neumático,Neumático,Baja presión,4.66,9
+2024-08-05,Neumático,Neumático,Desgaste anormal,16.27,3
+2024-08-05,Neumático,Neumático,Inspección programada,2.49,1
+2024-08-05,Neumático,Neumático,Otros,4.7,3
+2024-08-05,Neumático,Neumático,Rotación inadecuada,15.24,2
+2024-08-05,Neumático,Neumático,Torque inadecuado,1.33,2
+2024-08-05,Sistema Eléctrico,24 volt.,Registro de código de falla en panel AID,2.11,1
+2024-08-05,Sistema Eléctrico,Luces,Falla en luces,2.82,1
+2024-08-05,Sistema Eléctrico,Luces,Otros,3.69,1
+2024-08-05,Sistema Eléctrico,Sistema partida,Otros,0.63,1
+2024-08-05,Sistema Eléctrico,Sistema partida,Sin partida,0.7999999999999999,2
+2024-08-05,Sistema Propulsión,Alternador,Falla reiteradas en alternadores principales,48.0,4
+2024-08-05,Sistema Propulsión,Alternador,Otros,9.42,1
+2024-08-05,Sistema Propulsión,MT,Otros,11.93,1
+2024-08-12,Sistema Hidráulico,Freno Estacionamiento,Otros,1.13,1
