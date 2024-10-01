@@ -153,9 +153,9 @@ def read_component_arrivals():
                 "Módulo Potencia 960": "modulo_potencia",
                 "Suspensión delantera 960": "suspension_delantera",
                 "Suspensión trasera 960": "suspension_trasera",
-            }[x]
+            }.get(x)
         )
-    )
+    ).dropna(subset=["component"])
 
     # Convert weeks to datetime for proper sorting
     df["arrival_projection_week"] = pd.to_datetime(df["arrival_projection_week"] + "-1", format="%Y-W%W-%w")
