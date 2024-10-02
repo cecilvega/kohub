@@ -4,115 +4,76 @@ import hmac
 import hashlib
 import time
 from collections import defaultdict
-
+import yaml
 
 st.set_page_config(layout="wide", page_icon="🚜")  # page_title="DevOps", page_icon=":bar_chart:",
 if "role" not in st.session_state:
     st.session_state.role = None
-ROLES = {"Komatsu": ["derek", "francisco"], "BHP": ["mel"]}
+
+from yaml.loader import SafeLoader
+import streamlit_authenticator as stauth
+from streamlit_authenticator.utilities import (
+    CredentialsError,
+    ForgotError,
+    Hasher,
+    LoginError,
+    RegisterError,
+    ResetError,
+    UpdateError,
+)
+from io import StringIO
+from azure.storage.blob import BlobServiceClient
+
+from datetime import timedelta
 
 
-def get_password_hash(password):
-    """Generate a SHA-256 hash of the password."""
-    return hashlib.sha256(password.encode()).hexdigest()
+@st.cache_data(ttl=timedelta(hours=1))
+def fetch_config():
+
+    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
+    blob_client = blob_service_client.get_blob_client(
+        container="kdata-raw",
+        blob="CONFIG/config.yaml",
+    )
+    blob_data = blob_client.download_blob().readall().decode("utf-8")
+    config = yaml.load(blob_data, Loader=SafeLoader)
+
+    return config
 
 
-def check_user_role(user, role):
-    if role not in ROLES:
-        return False
-    return user in ROLES[role]
-
-
-def password_entered(role: str):
-    """Checks whether a password entered by the user is correct."""
-    user = st.session_state["username"]
-    if check_user_role(user, role):
-        stored_hash = os.environ.get(f"PASSWORD_{user.upper()}")
-        if stored_hash and hmac.compare_digest(get_password_hash(st.session_state["password"]), stored_hash):
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]  # Don't store the password.
-            del st.session_state["username"]
-    else:
-        st.session_state["password_correct"] = False
-        st.error("Incorrect username or password")
-
-
-def check_password():
-    """Returns `True` if the user had a correct password."""
-
-    def password_entered():
-        """Checks whether a password entered by the user is correct."""
-        user = st.session_state["username"]
-        stored_hash = os.environ.get(f"PASSWORD_{user.upper()}")
-        st.write(get_password_hash(st.session_state["password"]))
-        st.write(stored_hash)
-        st.write(stored_hash == get_password_hash(st.session_state["password"]))
-        if stored_hash and hmac.compare_digest(get_password_hash(st.session_state["password"]), stored_hash):
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]  # Don't store the password.
-            del st.session_state["username"]
-        else:
-            st.session_state["password_correct"] = False
-            st.error("Incorrect username or password")
-
-    if st.session_state.get("password_correct", False):
-        return True
-
-    # Show inputs for username + password.
-    st.text_input("Username", key="username")
-    st.text_input("Password", type="password", key="password")
-    st.button("Log in", on_click=password_entered)
-
-    # Return True if the username + password is validated.
-    if st.session_state.get("password_correct", False):
-        return True
-
-    return False
-
-
-def login():
-
-    st.header("Log in")
-    role = st.selectbox("Choose your role", [None, *list(ROLES.keys())])
-    st.text_input("Username", key="username")
-    st.text_input("Password", type="password", key="password")
-    # For debugging purposes skip login
-    if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
-        st.session_state.logged_in = True
-        st.session_state.role = "Komatsu"
-        st.rerun()
-    if st.button("Log in"):
-        password_entered(role)
-
-        # Return True if the username + password is validated.
-        if st.session_state.get("password_correct", False):
-            st.session_state.logged_in = True
-            st.session_state.role = role
-            st.rerun()
+config = fetch_config()
+authenticator = stauth.Authenticate(
+    config["credentials"], config["cookie"]["name"], config["cookie"]["key"], config["cookie"]["expiry_days"]
+)
 
 
 def logout():
-    st.session_state.role = None
-    st.session_state.logged_in = False
+    # st.session_state.role = None
+    # st.session_state.logged_in = False
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+
     st.rerun()
 
 
-role = st.session_state.role
+def login():
+    pass
 
-logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
+
+# logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
 settings = st.Page("settings.py", title="Settings", icon=":material/settings:")
 
 bhp_home = st.Page(
     "pages/bhp/home.py",
     title="Home",
     icon=":material/healing:",
-    default=(role == "BHP"),
+    default=(st.session_state.role == "BHP"),
 )
 komatsu_home = st.Page(
     "pages/komatsu/inicio.py",
     title="Inicio",
     icon=":material/person_add:",
-    default=(role == "Komatsu"),
+    default=(st.session_state.role == "Komatsu"),
 )
 
 
@@ -120,7 +81,7 @@ pool_projection = st.Page("pages/planification/poolkch.py", title="Pool KCH")  #
 spence = st.Page("pages/komatsu/Spence.py", title="Spence")
 
 # settings
-account_pages = [logout_page]
+# account_pages = [logout_page]
 bhp_pages = [bhp_home, pool_projection]
 komatsu_pages = [komatsu_home, spence]
 
@@ -130,37 +91,42 @@ st.logo(
     icon_image="images/komatsu.png",
 )
 
+# Check if the user just logged out
+if st.session_state.get("just_logged_out", False):
+    st.session_state.just_logged_out = False
+    st.rerun()
+
 page_dict = {}
-if st.session_state.role in ["BHP", "Komatsu"]:
+try:
+    authenticator.login()
+except LoginError as e:
+    st.error(e)
+if st.session_state["authentication_status"]:
+    st.write("___")
+
+    st.write(f'Welcome *{st.session_state["username"]}*')
+    st.title("Some content")
+    st.write("___")
+    st.session_state.logged_in = True
+
+    if "bhp" in st.session_state.roles:
+        st.write(True)
     page_dict["BHP"] = bhp_pages
-if st.session_state.role == "Komatsu":
-    page_dict["Komatsu"] = komatsu_pages
+    if "komatsu" in st.session_state.roles:
+        page_dict["Komatsu"] = komatsu_pages
+
+    authenticator.logout(location="sidebar", callback=lambda x: logout)
+
+
+elif st.session_state["authentication_status"] is False:
+    st.error("Username/password is incorrect")
+    st.stop()
+elif st.session_state["authentication_status"] is None:
+    st.warning("Please enter your username and password")
 
 if len(page_dict) > 0:
-    pg = st.navigation({"Account": account_pages} | page_dict)
+    pg = st.navigation(page_dict)
 else:
     pg = st.navigation([st.Page(login)])
 
-
 pg.run()
-
-# from collections import defaultdict
-#
-# home = st.Page("../komatsu/inicio.py", title="Home", default=True)  # icon=":material/dashboard:"
-# pool_proyection = st.Page(
-#     "../planification/poolkch.py", title="Proyección Pool"
-# )  # , icon=":material/dashboard:"
-# pool_nsc_detail = st.Page("../planification/poo_nsc_detail.py", title="NSC Detalle")  # , icon=":material/dashboard:"
-# pool_nsc_general = st.Page("../planification/pool_nsc_general.py", title="NSC General")  # , icon=":material/dashboard:"
-#
-# hsec_3d = st.Page("../hse/3d.py", title="3D")  # , icon=":material/dashboard:"
-#
-# pg = st.navigation(
-#     {
-#         "Landing": [home],
-#         "Planificación": [pool_proyection, pool_nsc_general, pool_nsc_detail],
-#         "HSEC": [hsec_3d],
-#     }
-# )
-#
-# pg.run()
