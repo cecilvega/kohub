@@ -9,3 +9,4 @@ streamlit-vis-timeline
 setuptools
 firebase-admin
 pyyaml
+streamlit_authenticator
