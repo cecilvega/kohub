@@ -102,16 +102,14 @@ try:
 except LoginError as e:
     st.error(e)
 if st.session_state["authentication_status"]:
-    st.write("___")
-
-    st.write(f'Welcome *{st.session_state["username"]}*')
-    st.title("Some content")
-    st.write("___")
+    # st.write("___")
+    # st.write(f'Welcome *{st.session_state["username"]}*')
+    # st.title("Some content")
+    # st.write("___")
     st.session_state.logged_in = True
 
     if "bhp" in st.session_state.roles:
-        st.write(True)
-    page_dict["BHP"] = bhp_pages
+        page_dict["BHP"] = bhp_pages
     if "komatsu" in st.session_state.roles:
         page_dict["Komatsu"] = komatsu_pages
 

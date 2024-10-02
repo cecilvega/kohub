@@ -272,6 +272,13 @@ class ComponentAllocation:
                         component_df = pd.concat([component_df, new_row], ignore_index=True)
                         component_df = component_df.sort_values("changeout_date")
 
+                        # Actualizar en missing components para debugging
+                        self.missing_cc_df.loc[
+                            (self.missing_cc_df["component"] == changeout["component"])
+                            & (self.missing_cc_df["component_serial"] == changeout["component_serial"])
+                            & (self.missing_cc_df["changeout_date"] == changeout["changeout_date"]),
+                            "allocated",
+                        ] = True
                     if should_break:
                         break
                 print("\n")
@@ -321,8 +328,6 @@ class ComponentAllocation:
         df = df[df["_merge"] == "left_only"].drop(columns="_merge")
         df["pool_changeout_type"] = df["pool_changeout_type"].fillna("P")
 
-        df = df.sort_values(["component", "changeout_date"]).reset_index(drop=True)
-
         df = pd.merge(
             df,
             self.blocked_lanes,
@@ -336,7 +341,7 @@ class ComponentAllocation:
             # arrival_week=df["arrival_date"].dt.strftime("%G-W%V"),
         )
         assert df.loc[df["pool_changeout_type"] == "E"].shape[0] == self.blocked_lanes.shape[0]
-
+        df = df.sort_values(["component", "changeout_date"]).reset_index(drop=True)
         return df
 
     def generate_pool_projection(self) -> pd.DataFrame:
