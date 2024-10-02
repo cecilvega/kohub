@@ -8,3 +8,4 @@ matplotlib
 streamlit-vis-timeline
 setuptools
 firebase-admin
+pyyaml
