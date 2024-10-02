@@ -85,7 +85,6 @@ spence = st.Page("pages/komatsu/Spence.py", title="Spence")
 bhp_pages = [bhp_home, pool_projection]
 komatsu_pages = [komatsu_home, spence]
 
-st.title("MEL")
 st.logo(
     "images/komatsu.png",
     icon_image="images/komatsu.png",

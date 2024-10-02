@@ -12,7 +12,7 @@ from io import BytesIO
 from kverse.assets.pool import *
 from pages.planification.utils.vis_px_timeline import plot_pool_px_timeline
 from kverse.assets.pool.blocked_lanes import read_blocked_lanes
-from pages.planification.utils.vis_timeline import plot_pool_timeline, plot_component_arrival_timeline
+from pages.planification.utils.vis_timeline import plot_component_arrival_timeline
 from pages.planification.utils.preprocessing import modify_dataframe
 from datetime import datetime, date, timedelta
 

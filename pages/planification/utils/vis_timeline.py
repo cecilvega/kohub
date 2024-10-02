@@ -35,53 +35,6 @@ def prepare_data(df):
     return df
 
 
-def plot_pool_timeline(df):
-
-    validate_input(df)
-    df = prepare_data(df)
-
-    # Create items for the timeline
-    items = []
-    for _, row in df.iterrows():
-        content = f"{row['equipo']} - {row['component_serial']}"
-        if row["pool_changeout_type"] == "A":
-            content += f" ({(row['arrival_date'] - row['changeout_date']).days}d)"
-
-        item = {
-            "id": str(len(items) + 1),
-            "content": content,
-            "start": row["changeout_date"].strftime("%Y-%m-%d"),
-            "end": row["arrival_date"].strftime("%Y-%m-%d"),
-            "group": str(row["pool_slot"]),
-            "style": f"background-color: {get_color(row['pool_changeout_type'])};",
-        }
-        items.append(item)
-
-    # Create groups for the timeline
-    groups = [{"id": str(slot), "content": f"Pool {slot}"} for slot in sorted(df["pool_slot"].unique())]
-
-    # Set up options for the timeline
-    options = {
-        "selectable": True,
-        "multiselect": False,
-        # "zoomable": True,
-        "stack": False,
-        "height": 500,
-        "margin": {"item": 10},
-        "groupHeightMode": "fixed",
-        "orientation": {"axis": "top", "item": "top"},
-        "format": {
-            "minorLabels": {"week": "w"},
-            "majorLabels": {"week": "MMMM YYYY"},
-        },
-        "showCurrentTime": True,
-    }
-
-    # Create and return the timeline
-    timeline = st_timeline(items=items, groups=groups, options=options)
-    return timeline
-
-
 def get_color(change_type):
     """Return color based on pool_changeout_type."""
     color_map = {

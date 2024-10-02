@@ -197,27 +197,13 @@ def add_invisible_trace(fig, df):
 
 
 def plot_pool_px_timeline(df, by_confirmed):
-    """
-    Create a Gantt chart of pool timeline using the provided DataFrame.
-
-    Parameters:
-    df (pandas.DataFrame): Input DataFrame containing pool timeline data.
-                           Required columns: pool_slot, changeout_date, arrival_date,
-                           pool_changeout_type, equipo, component_serial
-
-    Returns:
-    plotly.graph_objects.Figure: A Plotly figure object representing the Gantt chart.
-
-    Raises:
-    ValueError: If required columns are missing from the input DataFrame.
-    """
 
     validate_input(df)
     df = prepare_data(df)
 
     if by_confirmed:
         df = df.dropna(subset=["arrival_status"]).reset_index(drop=True)
-
+        df = df.assign(pool_slot=lambda x: x["pool_slot"].astype("int"))
     # Calculate days in repair
     df["days_in_repair"] = (df["arrival_date"] - df["changeout_date"]).dt.days
 
