@@ -205,8 +205,8 @@ class ComponentAllocation:
     def allocate_components(self) -> pd.DataFrame:
 
         frames = []
-        # for component in self.missing_cc_df["component"].unique():
-        for component in ["motor_traccion"]:
+        for component in self.missing_cc_df["component"].unique():
+            # for component in ["motor_traccion"]:
             component_df = self.pool_slots_df.loc[self.pool_slots_df["component"] == component]
 
             print(f"#########\nAsignando pool a {component}:")
