@@ -35,11 +35,13 @@ def fetch_and_clean_data():
     arrivals_df = read_component_arrivals()
     blocked_lanes = read_blocked_lanes()
     allocation = ComponentAllocation(cc_df, pool_proj_df, arrivals_df, blocked_lanes)
-    df = allocation.generate_pool_projection()
-    return df
+    allocation.generate_pool_projection()
+    return allocation
 
 
-df = fetch_and_clean_data()
+allocation = fetch_and_clean_data()
+df = allocation.allocated_df.copy()
+allocations_log = allocation.allocations_log
 arrivals_df = fetch_arrivals()
 
 # Drop missing components
@@ -64,21 +66,23 @@ component = st.sidebar.selectbox(
 )
 
 
-st.title("Proyección de entrega")
+comp_df = df.loc[df["component"] == component].reset_index(drop=True)
+
+
+comp_df = modify_dataframe(comp_df)
+
+st.title("Entregas confirmadas")
+
+timeline = plot_component_arrival_timeline(arrivals_df)
+if timeline:
+    st.markdown(f"Fecha llegada: {timeline['start']}<br>Serie Componente: {timeline['group']}", unsafe_allow_html=True)
+
+
+st.title(f"Proyección de entrega para {options_display[component].lower()}")
 
 st.write("Al hacer click sobre la leyenda, permite remover o activar si se desea ver cierto estado.")
 
-comp_df = df.loc[df["component"] == component].reset_index(drop=True)
 
-# Date slider
-min_date = comp_df["changeout_date"].min().date()
-max_date = comp_df["arrival_date"].max().date()
-# Filter and sort data
-today = datetime.now()
-jan_1 = date(today.year, 1, 1)
-dec_31 = date(today.year, 12, 31)
-
-comp_df = modify_dataframe(comp_df)
 pool_slots = comp_df["pool_slot"].drop_duplicates().to_list()
 
 
@@ -100,13 +104,16 @@ pool_slots_filter = st.sidebar.multiselect(
 
 st.sidebar.write("Permite filtrar que lineas del pool se desean visualizar.")
 
-d = st.sidebar.date_input(
-    "Seleccionar fecha:",
-    (jan_1, max_date),
-    min_date,
-    max_date,
-    format="MM.DD.YYYY",
+
+d = st.sidebar.slider(
+    "Seleccionar fechas a visualizar",
+    min_value=date(2023, 1, 1),
+    max_value=date(2025, 6, 1),
+    value=(date(2024, 4, 1), date(2025, 1, 1)),
+    format="Y-MM",
+    step=timedelta(weeks=1),
 )
+
 
 colors = (
     comp_df.sort_values(["pool_slot", "arrival_date"])
@@ -117,25 +124,19 @@ colors = (
 
 # Filtro especial para ver cuales están confirmados
 confirmed_filter = st.sidebar.toggle = st.toggle("Ver Confirmados")
-
-plot_df = comp_df.loc[
-    (comp_df["pool_slot"].isin(pool_slots_filter)) & (comp_df["arrival_date"].dt.date.between(d[0], d[1]))
-]
-# if confirmed_filter:
-#
-#     plot_df = plot_df.loc[(plot_df["confirmed"] == 1) | (plot_df["confirmed"].isnull())]
+debug_mode = st.toggle("Debug Mode")
+plot_df = comp_df.loc[(comp_df["pool_slot"].isin(pool_slots_filter))]
 
 ## Number of colors does not need to match the number of options
 colorize_multiselect_options(colors)
 
-fig = plot_pool_px_timeline(plot_df, by_confirmed=confirmed_filter)
-
+fig = plot_pool_px_timeline(plot_df, by_confirmed=confirmed_filter, range_x=d)
 st.plotly_chart(fig, use_container_width=True)
 
+if debug_mode:
+    if not "No se pudo agregar componente" in {allocations_log[component]}:
+        st.markdown("✅")
+    else:
+        st.markdown("❌")
 
-st.title("Entregas confirmadas")
-
-
-timeline = plot_component_arrival_timeline(arrivals_df)
-if timeline:
-    st.markdown(f"Fecha llegada: {timeline['start']}<br>Serie Componente: {timeline['group']}", unsafe_allow_html=True)
+    st.write(allocations_log[component], unsafe_allow_html=True)

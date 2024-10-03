@@ -6,7 +6,7 @@ import numpy as np
 from pages.planification.utils.vis_timeline import validate_input, prepare_data
 
 
-def create_base_chart(df, by_confirmed):
+def create_base_chart(df, by_confirmed, range_x):
     """Create the base Gantt chart with custom hover template."""
     hover_template = (
         "<b>Serie Componente:</b> %{customdata[0]}<br>"
@@ -57,6 +57,7 @@ def create_base_chart(df, by_confirmed):
             "arrival_status",
         ],
         height=500,
+        range_x=range_x,
         # title="Proyección en función de cambios reales",
     )
 
@@ -196,7 +197,7 @@ def add_invisible_trace(fig, df):
     )
 
 
-def plot_pool_px_timeline(df, by_confirmed):
+def plot_pool_px_timeline(df, by_confirmed, range_x):
 
     validate_input(df)
     df = prepare_data(df)
@@ -207,7 +208,7 @@ def plot_pool_px_timeline(df, by_confirmed):
     # Calculate days in repair
     df["days_in_repair"] = (df["arrival_date"] - df["changeout_date"]).dt.days
 
-    fig = create_base_chart(df, by_confirmed)
+    fig = create_base_chart(df, by_confirmed, range_x)
     customize_layout(fig, df)
     add_annotations(fig, df)
     add_invisible_trace(fig, df)

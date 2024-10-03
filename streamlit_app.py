@@ -126,4 +126,20 @@ if len(page_dict) > 0:
 else:
     pg = st.navigation([st.Page(login)])
 
+
+# EXTRA:
+css = """
+<style>
+    .stSlider [data-testid="stTickBar"] {
+        display: none;
+    }
+    .stSlider label {
+        display: block;
+        text-align: center;
+    }
+</style>
+"""
+
+st.markdown(css, unsafe_allow_html=True)
+
 pg.run()

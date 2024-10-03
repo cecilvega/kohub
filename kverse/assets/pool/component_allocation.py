@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 # Constants
 
-CHANGEOUT_START_DATE = pd.Timestamp(2024, 6, 1)
+CHANGEOUT_START_DATE = pd.Timestamp(year=2024, month=7, day=29)
 
 
 @dataclass(frozen=True)
@@ -122,6 +122,8 @@ class ComponentAllocation:
         self.arrivals_df = self._preprocess_arrivals_df(arrivals_df)
         self.missing_cc_df = self.get_missing_changeouts()
         self.pool_slots_df = self.get_base_pool_slots()
+        self.allocated_df = pd.DataFrame
+        self.allocations_log = {}
 
     def _preprocess_cc_df(self, cc_df: pd.DataFrame) -> pd.DataFrame:
         cc_df = priority_sort(cc_df)
@@ -174,7 +176,7 @@ class ComponentAllocation:
             .sort_values("arrival_date_proj")
             .reset_index(drop=True)[["component", "arrival_date_proj", "changeout_date", "pool_slot"]]
         )
-        self.unconfirmed_df = unconfirmed_df
+        # self.unconfirmed_df = unconfirmed_df
 
         # La unión se efectua encontrando la fecha más cercana
         component_arrival_df = pd.merge_asof(
@@ -186,7 +188,7 @@ class ComponentAllocation:
             direction="nearest",
         )
 
-        self.component_arrival_df = component_arrival_df
+        # self.component_arrival_df = component_arrival_df
 
         for _, row in component_arrival_df.iterrows():
             mask = (component_df["changeout_date"] == row["changeout_date"]) & (
@@ -209,7 +211,7 @@ class ComponentAllocation:
             # for component in ["motor_traccion"]:
             component_df = self.pool_slots_df.loc[self.pool_slots_df["component"] == component]
 
-            print(f"#########\nAsignando pool a {component}:")
+            self.allocations_log[component] = ""
             should_break = False
             # Encontrar semanas por donde va a ir iterando el algoritmo dado un componente
             weeks = (
@@ -225,7 +227,7 @@ class ComponentAllocation:
             )
             weeks = sorted(weeks)
             for week in weeks:
-                print(f"\n{week}")
+                self.allocations_log[component] += f"\nSemana {week}:"
                 week_arrivals_df = self.arrivals_df.loc[
                     (self.arrivals_df["arrival_week"] == week) & (self.arrivals_df["component"] == component)
                 ].reset_index(drop=True)
@@ -233,22 +235,25 @@ class ComponentAllocation:
                     (self.missing_cc_df["changeout_week"] == week) & (self.missing_cc_df["component"] == component)
                 ].reset_index(drop=True)
                 if week_arrivals_df.shape[0] == 0:
-                    print(f"Sin llegadas de componente")
+                    self.allocations_log[component] += f"\nSin llegadas de componente"
                 else:
 
-                    print(
-                        f"Se agrega llegada componente {component} con fecha: {week_arrivals_df['arrival_date'].to_list()}"
-                    )
+                    self.allocations_log[
+                        component
+                    ] += f"\nSe agrega llegada componente {component} con fecha: {week_arrivals_df['arrival_date'].dt.strftime('%Y-%m-%d').to_list()}"
+
                     component_df = component_df.pipe(self.add_arrival_date, week_arrivals_df)
 
                 if week_cc_df.shape[0] == 0:
-                    print(f"No existen cambios de componente para la semana {week}, componente {component}")
+                    self.allocations_log[
+                        component
+                    ] += f"\nNo existen cambios de componente para la semana {week}, componente {component}"
                 else:
 
                     # Proceder con agregar el componente
                     for _, changeout in week_cc_df.iterrows():
-                        print(
-                            f"Se agrega cambio de componente con fecha: {changeout['changeout_date'].strftime('%Y-%m-%d')}, "
+                        self.allocations_log[component] += (
+                            f"\nSe agrega cambio de componente con fecha: {changeout['changeout_date'].strftime('%Y-%m-%d')}, "
                             f"equipo: {changeout['equipo']}, serie: {changeout['component_serial']}"
                         )
                         new_row = changeout.copy()
@@ -266,7 +271,7 @@ class ComponentAllocation:
 
                             else:
                                 should_break = True
-                                print(f"No se pudo agregar componente.")
+                                self.allocations_log[component] += f"\nNo se pudo agregar componente."
                                 break
                         new_row = pd.DataFrame([new_row])
                         new_row = add_arrival_date_proj(new_row)
@@ -282,7 +287,7 @@ class ComponentAllocation:
                         ] = True
                     if should_break:
                         break
-                print("\n")
+                self.allocations_log[component] += "\n"
             frames.append(component_df)
 
         df = pd.concat(frames)
@@ -354,4 +359,4 @@ class ComponentAllocation:
         df["componente"] = df["component"].map({c.value.code: c.value.name for c in ComponentType})
         df = df.reset_index(drop=True)
         df = df.assign(arrival_date=np.where(df["arrival_date"].isnull(), df["arrival_date_proj"], df["arrival_date"]))
-        return df
+        self.allocated_df = df
