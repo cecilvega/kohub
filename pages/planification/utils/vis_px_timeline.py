@@ -200,10 +200,10 @@ def plot_pool_px_timeline(df, by_confirmed):
 
     validate_input(df)
     df = prepare_data(df)
-
+    df = df.assign(pool_slot=lambda x: x["pool_slot"].astype("int"))
     if by_confirmed:
         df = df.dropna(subset=["arrival_status"]).reset_index(drop=True)
-        df = df.assign(pool_slot=lambda x: x["pool_slot"].astype("int"))
+
     # Calculate days in repair
     df["days_in_repair"] = (df["arrival_date"] - df["changeout_date"]).dt.days
 
