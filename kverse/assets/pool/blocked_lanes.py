@@ -34,5 +34,6 @@ def read_blocked_lanes():
             }
         )
         .assign(equipo=lambda x: x["equipo"].astype(str))
+        .dropna(subset=["pool_slot"])
     )
     return df
