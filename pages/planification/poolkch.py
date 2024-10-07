@@ -41,6 +41,7 @@ def fetch_and_clean_data():
 
 allocation = fetch_and_clean_data()
 df = allocation.allocated_df.copy()
+df = df.assign(pool_slot=lambda x: x["pool_slot"].astype("int"))
 allocations_log = allocation.allocations_log
 arrivals_df = fetch_arrivals()
 
@@ -130,13 +131,16 @@ plot_df = comp_df.loc[(comp_df["pool_slot"].isin(pool_slots_filter))]
 ## Number of colors does not need to match the number of options
 colorize_multiselect_options(colors)
 
+# st.dataframe(plot_df)
+
+
 fig = plot_pool_px_timeline(plot_df, by_confirmed=confirmed_filter, range_x=d)
 st.plotly_chart(fig, use_container_width=True)
 
 if debug_mode:
-    if not "No se pudo agregar componente" in {allocations_log[component]}:
-        st.markdown("✅")
-    else:
+    if "No se pudo agregar componente" in allocations_log[component]:
         st.markdown("❌")
+    else:
+        st.markdown("✅")
 
     st.write(allocations_log[component], unsafe_allow_html=True)

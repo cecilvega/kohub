@@ -63,32 +63,12 @@ def login():
 # logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
 settings = st.Page("settings.py", title="Settings", icon=":material/settings:")
 
-bhp_home = st.Page(
-    "pages/bhp/home.py",
-    title="Home",
-    icon=":material/healing:",
-    default=(st.session_state.role == "BHP"),
-)
-komatsu_home = st.Page(
-    "pages/komatsu/inicio.py",
-    title="Inicio",
-    icon=":material/person_add:",
-    default=(st.session_state.role == "Komatsu"),
-)
-
 
 pool_projection = st.Page("pages/planification/poolkch.py", title="Pool KCH")  # , icon=":material/dashboard:"
-spence = st.Page("pages/komatsu/Spence.py", title="Spence")
+spence = st.Page("pages/reliability/Spence.py", title="Spence")
 
-# settings
-# account_pages = [logout_page]
-bhp_pages = [bhp_home, pool_projection]
-komatsu_pages = [komatsu_home, spence]
 
-st.logo(
-    "images/komatsu.png",
-    icon_image="images/komatsu.png",
-)
+st.logo("images/komatsu.png", icon_image="images/komatsu.png")
 
 # Check if the user just logged out
 if st.session_state.get("just_logged_out", False):
@@ -107,10 +87,34 @@ if st.session_state["authentication_status"]:
     # st.write("___")
     st.session_state.logged_in = True
 
-    if "bhp" in st.session_state.roles:
-        page_dict["BHP"] = bhp_pages
     if "komatsu" in st.session_state.roles:
-        page_dict["Komatsu"] = komatsu_pages
+        komatsu_home = st.Page(
+            "pages/home/home_komatsu.py",
+            title="Inicio",
+            icon=":material/person_add:",
+            default=(st.session_state.role == "komatsu"),
+        )
+        bhp_home = st.Page(
+            "pages/home/home_mel.py",
+            title="Inicio (MEL)",
+            icon=":material/healing:",
+            default=(st.session_state.role == "home"),
+        )
+        page_dict["Inicio"] = [komatsu_home, bhp_home]
+        page_dict["Planificación"] = [pool_projection]
+        page_dict["Confiabilidad"] = [spence]
+    else:
+        bhp_home = st.Page(
+            "pages/home/home_mel.py",
+            title="Inicio",
+            icon=":material/healing:",
+            default=(st.session_state.role == "home"),
+        )
+        if "spence" in st.session_state.roles:
+            page_dict["Inicio"] = [bhp_home]
+        if "mel" in st.session_state.roles:
+            page_dict["Inicio"] = [bhp_home]
+            page_dict["Planificación"] = [pool_projection]
 
     authenticator.logout(location="sidebar", callback=lambda x: logout)
 

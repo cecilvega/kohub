@@ -12,7 +12,9 @@ def create_base_chart(df, by_confirmed, range_x):
         "<b>Serie Componente:</b> %{customdata[0]}<br>"
         "<b>Fecha de Cambio:</b> %{customdata[1]} <b>(%{customdata[2]})</b><br>"
         "<b>Fecha llegada:</b> %{customdata[3]} <b>(%{customdata[4]})</b><br>"
-        "<b>Días reparación:</b> %{customdata[5]}"
+        "<b>Días reparación:</b> %{customdata[5]}<br>"
+        "<b>TaT:</b> %{customdata[7]}<br>"
+        "<b>Cumplimiento:</b> %{customdata[6]}%"
     )
 
     # Create a custom column for viewing arrival date as a string format
@@ -54,6 +56,8 @@ def create_base_chart(df, by_confirmed, range_x):
             "vis_arrival_date",
             "arrival_week",
             "days_in_repair",
+            "completion_rate",
+            "ovh_days",
             "arrival_status",
         ],
         height=500,
@@ -201,12 +205,13 @@ def plot_pool_px_timeline(df, by_confirmed, range_x):
 
     validate_input(df)
     df = prepare_data(df)
-    df = df.assign(pool_slot=lambda x: x["pool_slot"].astype("int"))
+
     if by_confirmed:
         df = df.dropna(subset=["arrival_status"]).reset_index(drop=True)
 
     # Calculate days in repair
     df["days_in_repair"] = (df["arrival_date"] - df["changeout_date"]).dt.days
+    df["completion_rate"] = (100 * (1 - (df["ovh_days"] - df["days_in_repair"]) / df["ovh_days"])).round(0)
 
     fig = create_base_chart(df, by_confirmed, range_x)
     customize_layout(fig, df)

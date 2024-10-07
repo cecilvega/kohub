@@ -54,22 +54,19 @@ def find_available_pool_slot(component_df: pd.DataFrame, changeout: pd.Series) -
     return df
 
 
+def get_ovh_days(row: pd.Series) -> int:
+    component = next(c for c in ComponentType if c.value.code == row["component"])
+    if component == ComponentType.MP:
+        if row["subcomponent"] in ["alternador_principal", "radiador"]:
+            return 64 if row["pool_changeout_type"] == "P" else 114
+    return component.value.planned_ovh_days if row["pool_changeout_type"] == "P" else component.value.unplanned_ovh_days
+
+
 def add_arrival_date_proj(df: pd.DataFrame) -> pd.DataFrame:
 
     required_columns = {"component", "changeout_date", "pool_changeout_type", "subcomponent"}
     if not required_columns.issubset(df.columns):
         raise ValueError(f"Missing required columns: {required_columns}")
-
-    def get_ovh_days(row: pd.Series) -> int:
-        component = next(c for c in ComponentType if c.value.code == row["component"])
-        if component == ComponentType.MP:
-            if row["subcomponent"] in ["alternador_principal", "radiador"]:
-                return 64 if row["pool_changeout_type"] == "P" else 114
-        return (
-            component.value.planned_ovh_days
-            if row["pool_changeout_type"] == "P"
-            else component.value.unplanned_ovh_days
-        )
 
     df = df.copy()
     df["ovh_days"] = df.apply(get_ovh_days, axis=1)
@@ -359,4 +356,5 @@ class ComponentAllocation:
         df["componente"] = df["component"].map({c.value.code: c.value.name for c in ComponentType})
         df = df.reset_index(drop=True)
         df = df.assign(arrival_date=np.where(df["arrival_date"].isnull(), df["arrival_date_proj"], df["arrival_date"]))
+        df["ovh_days"] = df.apply(get_ovh_days, axis=1)
         self.allocated_df = df

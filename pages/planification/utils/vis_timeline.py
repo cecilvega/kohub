@@ -10,6 +10,15 @@ import numpy as np
 from streamlit_timeline import st_timeline
 import streamlit as st
 from datetime import timedelta
+import re
+
+color_map = {
+    "REPROGRAMADO": "#942d00",  # Red
+    "REAL": "#007569",  # Green
+    # "E": "#a5abaf",  # Gray
+    # "R": "#ffc82f",  # Orange
+    "PROYECTADO": "#140a9a",  # Blue
+}
 
 
 def validate_input(df):
@@ -35,19 +44,34 @@ def prepare_data(df):
     return df
 
 
-def get_color(change_type):
-    """Return color based on pool_changeout_type."""
-    color_map = {
-        "REPROGRAMADO": "#942d00",  # Red
-        "REAL": "#007569",  # Green
-        # "E": "#a5abaf",  # Gray
-        # "R": "#ffc82f",  # Orange
-        "PROYECTADO": "#140a9a",  # Blue
-    }
-    return color_map.get(change_type, "#000000")  # Default to black if not found
+def clean_text_column(df, column_name):
+    # Function to clean individual text entries
+    def clean_text(text):
+        # Remove 'REAL' and 'reprogramado REAL'
+        text = re.sub(r"REAL|REPROGRAMADO|X1|X2", "", text, flags=re.IGNORECASE)
+
+        # Remove extra whitespace, including newlines
+        text = " ".join(text.split())
+        text = re.sub(r"(\d{2}-\d{2}-\d{4})", r"\1<br>", text)
+        return text.strip()
+
+    # Apply the cleaning function to the specified column
+    df[column_name] = df[column_name].astype(str).apply(clean_text)
+
+    return df
 
 
 def plot_component_arrival_timeline(df):
+
+    for label, color in color_map.items():
+        st.markdown(
+            f'<div style="display: flex; align-items: center; margin-bottom: 5px;">'
+            f'<div style="width: 20px; height: 20px; background-color: {color}; '
+            f'margin-right: 10px; border: 1px solid #000;"></div>'
+            f"<span>{label}</span>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
     df = df.assign(
         component=df["component"].map(
@@ -62,8 +86,8 @@ def plot_component_arrival_timeline(df):
             }[x]
         )
     )
-    df["label"] = df.groupby(["component", "arrival_date"])["arrival_date"].transform("count").astype(str)
-    df["label"] = df["arrival_date"].dt.strftime("%Y-%m-%d") + " (" + df["label"] + ")"
+    df = clean_text_column(df, "value")
+    # df["label"] = df["arrival_date"].dt.strftime("%Y-%m-%d") + " (" + df["label"] + ")"
 
     # TODO: RETOMAR
     # proj_df = df.loc[
@@ -96,10 +120,11 @@ def plot_component_arrival_timeline(df):
     for _, row in df.iterrows():
         item = {
             "id": str(len(items) + 1),
-            "content": f"{row['label']}",
+            "content": f"{row['value']}",
             "start": row["arrival_date"].strftime("%Y-%m-%d"),
             "group": row["component"],
-            "style": f"background-color: {get_color(row['arrival_type'])};color: white;",
+            "style": f"background-color: {color_map.get(row['arrival_type'], '#000000')};color: white;",
+            "subgroup": row["Número"],
         }
         items.append(item)
 
@@ -112,10 +137,12 @@ def plot_component_arrival_timeline(df):
         "multiselect": False,
         "zoomable": True,
         "stack": False,
-        "height": "450px",  # Increased height to accommodate more component codes
+        "subgroupStack": False,
+        "height": "650px",  # Increased height to accommodate more component codes
         "margin": {"item": 10},
-        "groupHeightMode": "fixed",
+        # "groupHeightMode": "fixed",
         "orientation": {"axis": "top", "item": "top"},
+        # "stack": False,
         "format": {
             "minorLabels": {"week": "w"},
             "majorLabels": {"week": "MMMM YYYY"},
