@@ -68,7 +68,7 @@ pool_projection = st.Page("pages/planification/poolkch.py", title="Pool KCH")  #
 spence = st.Page("pages/reliability/Spence.py", title="Spence")
 
 planification_home = st.Page(
-    "pages/planification/planification_komatsu.py",
+    "pages/planification/planification_home.py",
     title="Información",
     icon=":material/person_add:",
 )
