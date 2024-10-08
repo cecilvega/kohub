@@ -11,16 +11,16 @@ import numpy as np
 
 
 def read_base_pool_proj():
-    if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
-        blob_data = "DATA/pool_proj.csv"
-    else:
-        blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
-        blob_client = blob_service_client.get_blob_client(
-            container="kdata-raw",
-            blob=f"PLANIFICACION/POOL/pool_proj.csv",
-        )
-        blob_data = blob_client.download_blob().readall()
-        blob_data = StringIO(blob_data.decode("latin-1"))
+    # if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
+    #     blob_data = "DATA/pool_proj.csv"
+    # else:
+    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
+    blob_client = blob_service_client.get_blob_client(
+        container="kdata-raw",
+        blob=f"PLANIFICACION/POOL/pool_proj.csv",
+    )
+    blob_data = blob_client.download_blob().readall()
+    blob_data = StringIO(blob_data.decode("latin-1"))
 
     df = pd.read_csv(blob_data)
     df = df.assign(

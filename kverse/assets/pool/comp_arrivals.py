@@ -104,17 +104,17 @@ def get_previous_week(week_range, year=2024):
 
 
 def read_component_arrivals():
-    if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
-        blob_data = "DATA/Planilla de seguimiento de cumplimiento de entrega componentes.xlsx"
-    else:
-        blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
+    # if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
+    #     blob_data = "DATA/Planilla de seguimiento de cumplimiento de entrega componentes.xlsx"
+    # else:
+    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
 
-        blob_client = blob_service_client.get_blob_client(
-            container="kdata-raw",
-            blob=f"PLANIFICACION/POOL/Planilla de seguimiento de cumplimiento de entrega componentes.xlsx",
-        )
-        blob_data = blob_client.download_blob()
-        blob_data = BytesIO(blob_data.readall())
+    blob_client = blob_service_client.get_blob_client(
+        container="kdata-raw",
+        blob=f"PLANIFICACION/POOL/ESCONDIDA/Planilla de seguimiento de cumplimiento de entrega componentes 2024.xlsx",
+    )
+    blob_data = blob_client.download_blob()
+    blob_data = BytesIO(blob_data.readall())
 
     workbook = openpyxl.load_workbook(blob_data)
     frames = []
@@ -123,14 +123,14 @@ def read_component_arrivals():
         df = pd.read_excel(blob_data, sheet_name=sheet, skiprows=1, engine="openpyxl", dtype="str")
         # Assume df is your DataFrame
         df = rename_datetime_columns(df)
-        df = df[["Componente", "Número"] + [col for col in df.columns if re.match(r"^\d{4}-\d{2}-\d{2}$", col)]]
+        df = df[["Componente", "N°"] + [col for col in df.columns if re.match(r"^\d{4}-\d{2}-\d{2}$", col)]]
         # Rellenar los componentes hacia adelante para cubrir el número 1 y 2.
         # Por defecto la primera fila sólo debiese tener las semanas y el ffill no cambiará el hecho de que sea nula y se pueda sacar
         df = df.assign(
             Componente=df["Componente"].ffill(),
             arrival_projection_week=get_previous_week(sheet),
         )
-        df = df.dropna(subset=["Componente", "Número"])
+        df = df.dropna(subset=["Componente", "N°"])
 
         df = df.pipe(reshape_to_long_format).dropna(subset=["value"])
 

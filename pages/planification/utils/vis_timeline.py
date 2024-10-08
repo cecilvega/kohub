@@ -124,7 +124,7 @@ def plot_component_arrival_timeline(df):
             "start": row["arrival_date"].strftime("%Y-%m-%d"),
             "group": row["component"],
             "style": f"background-color: {color_map.get(row['arrival_type'], '#000000')};color: white;",
-            "subgroup": row["Número"],
+            "subgroup": row["N°"],
         }
         items.append(item)
 

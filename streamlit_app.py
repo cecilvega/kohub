@@ -67,6 +67,12 @@ settings = st.Page("settings.py", title="Settings", icon=":material/settings:")
 pool_projection = st.Page("pages/planification/poolkch.py", title="Pool KCH")  # , icon=":material/dashboard:"
 spence = st.Page("pages/reliability/Spence.py", title="Spence")
 
+planification_home = st.Page(
+    "pages/planification/planification_komatsu.py",
+    title="Información",
+    icon=":material/person_add:",
+)
+
 
 st.logo("images/komatsu.png", icon_image="images/komatsu.png")
 
@@ -92,23 +98,20 @@ if st.session_state["authentication_status"]:
             "pages/home/home_komatsu.py",
             title="Inicio",
             icon=":material/person_add:",
-            default=(st.session_state.role == "komatsu"),
         )
         bhp_home = st.Page(
             "pages/home/home_mel.py",
             title="Inicio (MEL)",
             icon=":material/healing:",
-            default=(st.session_state.role == "home"),
         )
         page_dict["Inicio"] = [komatsu_home, bhp_home]
-        page_dict["Planificación"] = [pool_projection]
+        page_dict["Planificación"] = [pool_projection, planification_home]
         page_dict["Confiabilidad"] = [spence]
     else:
         bhp_home = st.Page(
             "pages/home/home_mel.py",
             title="Inicio",
             icon=":material/healing:",
-            default=(st.session_state.role == "home"),
         )
         if "spence" in st.session_state.roles:
             page_dict["Inicio"] = [bhp_home]

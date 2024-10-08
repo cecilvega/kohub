@@ -11,17 +11,17 @@ import openpyxl
 
 
 def read_blocked_lanes():
-    if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
-        blob_data = "DATA/COMPONENTES EN ESPERA APROBACION.xlsx"
-    else:
-        blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
+    # if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
+    #     blob_data = "DATA/COMPONENTES EN ESPERA APROBACION.xlsx"
+    # else:
+    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
 
-        blob_client = blob_service_client.get_blob_client(
-            container="kdata-raw",
-            blob=f"PLANIFICACION/POOL/COMPONENTES EN ESPERA APROBACION.xlsx",
-        )
-        blob_data = blob_client.download_blob()
-        blob_data = BytesIO(blob_data.readall())
+    blob_client = blob_service_client.get_blob_client(
+        container="kdata-raw",
+        blob=f"PLANIFICACION/POOL/COMPONENTES EN ESPERA APROBACION.xlsx",
+    )
+    blob_data = blob_client.download_blob()
+    blob_data = BytesIO(blob_data.readall())
     df = (
         pd.read_excel(blob_data)
         .rename(
