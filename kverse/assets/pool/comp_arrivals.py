@@ -103,10 +103,23 @@ def get_previous_week(week_range, year=2024):
     return previous_week.strftime("%Y-W%V")
 
 
+def format_datetime(value):
+    if isinstance(value, pd.Timestamp) or isinstance(value, datetime):
+        return value.strftime("%d-%m-%Y")
+    elif isinstance(value, str):
+        try:
+            # Try to parse the string as a datetime
+            parsed_date = pd.to_datetime(value, errors="raise")
+            return parsed_date.strftime("%d-%m-%Y")
+        except (ValueError, TypeError):
+            # If parsing fails, return the original string
+            return value
+    else:
+        return value
+
+
 def read_component_arrivals():
-    # if os.environ.get("USERNAME") in ["cecilvega", "U1309565", "andmn"]:
-    #     blob_data = "DATA/Planilla de seguimiento de cumplimiento de entrega componentes.xlsx"
-    # else:
+
     blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
 
     blob_client = blob_service_client.get_blob_client(
@@ -118,9 +131,13 @@ def read_component_arrivals():
 
     workbook = openpyxl.load_workbook(blob_data)
     frames = []
+
     for sheet in workbook.sheetnames:
 
         df = pd.read_excel(blob_data, sheet_name=sheet, skiprows=1, engine="openpyxl", dtype="str")
+        # Apply the formatting function to every cell in the DataFrame
+        df = df.applymap(format_datetime)
+
         # Assume df is your DataFrame
         df = rename_datetime_columns(df)
         df = df[["Componente", "N°"] + [col for col in df.columns if re.match(r"^\d{4}-\d{2}-\d{2}$", col)]]
@@ -133,7 +150,6 @@ def read_component_arrivals():
         df = df.dropna(subset=["Componente", "N°"])
 
         df = df.pipe(reshape_to_long_format).dropna(subset=["value"])
-
         df[["arrival_date", "arrival_type"]] = df["value"].apply(lambda x: pd.Series(extract_date_and_type(x)))
         # Add an overall assertion check
 
@@ -142,7 +158,9 @@ def read_component_arrivals():
             and df[df["value"].notna()]["arrival_type"].notna().all()
         ), "Some non-null values resulted in null arrival_date or arrival_type"
         frames.append(df)
+
     df = pd.concat(frames)
+
     df = df.assign(
         component=df["Componente"].map(
             lambda x: {

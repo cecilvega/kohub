@@ -17,7 +17,7 @@ def read_base_pool_proj():
     blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
     blob_client = blob_service_client.get_blob_client(
         container="kdata-raw",
-        blob=f"PLANIFICACION/POOL/pool_proj.csv",
+        blob=f"PLANIFICACION/POOL/ESCONDIDA/pool_proj.csv",
     )
     blob_data = blob_client.download_blob().readall()
     blob_data = StringIO(blob_data.decode("latin-1"))
