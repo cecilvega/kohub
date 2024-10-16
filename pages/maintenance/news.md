@@ -84,20 +84,6 @@ Implementar una herramienta digital integral que automatice los procesos adminis
 
 ### Situación Actual
 
-Cambiar esta imagen
-
-```mermaid
-flowchart TD
-    A[Inicio] --> B[Registro Manual de Asistencia]
-    B --> C[Asignación Manual de Turnos y Camas]
-    C --> D[Cálculo Manual de FTE]
-    D --> E[Registro Manual de Tareas]
-    E --> F[Generación Manual de Reportes]
-    F --> G[Fin]
-
-```
-	
-
 - **Procesos Manuales y Repetitivos**: El Jefe de Mantención y su equipo enfrentan una carga administrativa significativa debido a procesos manuales en la gestión de asistencia, asignación de camas y turnos, cálculo de FTE y registro de tareas operativas.
 - **Problemas Asociados**:
     - Consumo excesivo de tiempo.
@@ -105,25 +91,6 @@ flowchart TD
     - Limitación para enfocarse en actividades estratégicas.
 
 ### Solución Propuesta
-
-![Diagrama de flujo de los procesos automatizados](#)
-
-mermaid
-
-Copiar código
-
-```mermaid
-flowchart TD
-    A[Inicio] --> B[Herramienta Digital]
-    B --> C[Automatización de Asistencia]
-    C --> D[Asignación Automática de Turnos y Camas]
-    D --> E[Cálculo Automático de FTE]
-    E --> F[Registro Digital de Tareas]
-    F --> G[Generación Automática de Reportes]
-    G --> H[Fin]
-
-```
-
 
 Desarrollar e implementar una **herramienta digital integral** en dos etapas:
 
