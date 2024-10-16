@@ -73,6 +73,12 @@ planification_home = st.Page(
     icon=":material/person_add:",
 )
 
+maintenance_home = st.Page(
+    "pages/maintenance/maintenance_home.py",
+    title="Información",
+    icon=":material/person_add:",
+)
+
 
 st.logo("images/komatsu.png", icon_image="images/komatsu.png")
 
@@ -106,6 +112,7 @@ if st.session_state["authentication_status"]:
         )
         page_dict["Inicio"] = [komatsu_home, bhp_home]
         page_dict["Planificación"] = [pool_projection, planification_home]
+        page_dict["Mantenimiento"] = [maintenance_home]
         page_dict["Confiabilidad"] = [spence]
     else:
         bhp_home = st.Page(

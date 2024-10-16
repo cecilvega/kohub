@@ -65,7 +65,10 @@ def create_base_chart(df, by_confirmed, range_x):
         # title="Proyección en función de cambios reales",
     )
 
-    fig.update_traces(hovertemplate=hover_template)
+    # Apply conditional hover templates
+    for i, row in df.iterrows():
+        fig.data[i].hovertemplate = hover_template  # get_hover_template(row)
+    # fig.update_traces(hovertemplate=hover_template)
 
     fig.for_each_trace(lambda t: t.update(name=trace_map[t.name]))
     return fig
