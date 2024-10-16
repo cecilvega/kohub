@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 from pages.planification.utils.vis_timeline import validate_input, prepare_data
+import streamlit as st
 
 
 def create_base_chart(df, by_confirmed, range_x):
@@ -18,11 +19,15 @@ def create_base_chart(df, by_confirmed, range_x):
     )
 
     # Create a custom column for viewing arrival date as a string format
-    df = df.assign(
-        vis_arrival_date=df["arrival_date"].dt.strftime("%Y-%m-%d"),
-        vis_changeout_date=df["changeout_date"].dt.strftime("%Y-%m-%d"),
-        changeout_week=df["changeout_date"].dt.strftime("W%W"),
-        arrival_week=df["arrival_date"].dt.strftime("W%W"),
+    df = (
+        df.assign(
+            vis_arrival_date=df["arrival_date"].dt.strftime("%Y-%m-%d"),
+            vis_changeout_date=df["changeout_date"].dt.strftime("%Y-%m-%d"),
+            changeout_week=df["changeout_date"].dt.strftime("W%W"),
+            arrival_week=df["arrival_date"].dt.strftime("W%W"),
+        )
+        .reset_index(drop=True)
+        .fillna("NA")
     )
 
     if not by_confirmed:
@@ -65,10 +70,23 @@ def create_base_chart(df, by_confirmed, range_x):
         # title="Proyección en función de cambios reales",
     )
 
-    # Apply conditional hover templates
-    for i, row in df.iterrows():
-        fig.data[i].hovertemplate = hover_template  # get_hover_template(row)
-    # fig.update_traces(hovertemplate=hover_template)
+    st.write(
+        df[
+            [
+                "component_serial",
+                "vis_changeout_date",
+                "changeout_week",
+                "vis_arrival_date",
+                "arrival_week",
+                "days_in_repair",
+                "completion_rate",
+                "ovh_days",
+                "arrival_status",
+            ]
+        ]
+    )
+
+    fig.update_traces(hovertemplate=hover_template)
 
     fig.for_each_trace(lambda t: t.update(name=trace_map[t.name]))
     return fig

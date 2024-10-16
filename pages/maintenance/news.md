@@ -12,11 +12,61 @@
 - [Conclusiones](#conclusiones)
 - [Preguntas](#preguntas)
 
+```mermaid
+graph TD
+    subgraph OuterBox1 [Que]
+        A1[Gestión Operativa]
+        
+	    A2[Mantención]
+    end
+    
+    subgraph OuterBox2 [Quien]
+        B1[Jefe Mantención]
+        B2[Jefe Confiabilidad]
+    end
+    
+    subgraph OuterBox3 [Para Qué]
+      C1[Liberar HH.]
+      C2[Gestión Equipo Trabajo]
+      C3[??]
+    end
+
+    subgraph OuterBox4 [KPI]
+      D1[8 horas liberadas semanales]
+      D2[??]
+      D3[%0% reducción??]
+    end
+    
+    A1 --> B1
+    A2 --> B2
+    A2 --> B1
+    
+    B1 --> C1
+    B1 --> C2
+    B2 --> C3
+    
+    C1 --> D1
+    C2 --> D2
+    C3 --> D3
+
+```
+
 ---
 
 ## Resumen Ejecutivo
 
-La iniciativa propone implementar una **solución tecnológica** para automatizar procesos administrativos clave en las áreas de Operación y Mantención. Al desarrollar una **herramienta digital integral**, se busca mejorar la eficiencia operativa y liberar al equipo de tareas manuales repetitivas. Esto permitirá enfocar recursos en actividades estratégicas que incrementen la confiabilidad y productividad, alineándose con los objetivos de excelencia operacional.
+```mermaid
+graph TD
+    A[Solución tecnológica] --> B[Automatización de procesos manuales]
+    B --> C[Enfoque Confiabilidad]
+    B --> D[Aumento Productividad]
+    D --> E[Excelencia operacional]
+	C --> E
+
+```
+
+
+La iniciativa propone implementar una **solución tecnológica** para automatizar procesos administrativos clave en las áreas de Operación. Al desarrollar una **herramienta digital integral**, se busca mejorar la eficiencia operativa y liberar al equipo de tareas manuales repetitivas. Esto permitirá enfocar recursos en actividades estratégicas que incrementen la confiabilidad y productividad, alineándose con los objetivos de excelencia operacional.
 
 
 ![[Pasted image 20241015203159.png]]
@@ -214,37 +264,3 @@ _Prompt para DALL·E: "Ilustración profesional de un equipo de trabajo celebran
 - **Compromiso del Equipo**: Colaboración entre todas las áreas involucradas.
 
 ---
-
-## Preguntas
-
-¿Tienes alguna pregunta o comentario sobre el proyecto?
-
----
-
-**Nota**: Este archivo `.md` está diseñado para ser desplegado en tu página web utilizando Streamlit. Puedes utilizar `st.tabs` para organizar cada sección en pestañas, proporcionando una navegación más interactiva. Los diagramas `mermaid` y las tablas enriquecerán visualmente la presentación.
-
-### Implementación en Streamlit
-
-Para integrar los diagramas y tablas en Streamlit, puedes usar las siguientes funciones:
-
-python
-
-Copiar código
-
-`import streamlit as st  # Crear pestañas tab1, tab2, tab3 = st.tabs(["Resumen Ejecutivo", "Descripción del Proyecto", "Hitos y Entregables"])  with tab1:     st.markdown("# Resumen Ejecutivo")     st.image("image1.png", caption="Automatización de procesos administrativos")     st.markdown("La iniciativa propone implementar...")  with tab2:     st.markdown("# Descripción del Proyecto")     st.markdown("### Situación Actual")     st.markdown("![Diagrama de flujo de los procesos actuales](#)")     # Puedes usar st.graphviz_chart() si conviertes el diagrama a formato DOT      st.markdown("### Solución Propuesta")     st.markdown("![Diagrama de flujo de los procesos automatizados](#)")     # De igual manera, usar st.graphviz_chart() si es necesario  with tab3:     st.markdown("# Hitos y Entregables")     st.markdown("### Cronograma del Proyecto")     st.markdown("```mermaid\n...gantt chart code...\n```")     # Para renderizar Mermaid en Streamlit, podrías usar una librería adicional o convertir a imagen      st.markdown("### Detalles de los Hitos")     # Continuar con el contenido  # Para los diagramas Mermaid st.markdown("```mermaid\n...diagrama...\n```", unsafe_allow_html=True)`
-
-**Nota sobre los Diagramas Mermaid en Streamlit**:
-
-- Streamlit no soporta nativamente Mermaid, pero puedes utilizar una librería o componente personalizado para renderizarlos, como `streamlit-mermaid`.
-- Otra opción es pre-renderizar los diagramas Mermaid a imágenes y luego insertarlas usando `st.image()`.
-
-### Generación de Imágenes con DALL·E
-
-Para generar las imágenes sugeridas, utiliza los siguientes prompts en DALL·E:
-
-1. **Resumen Ejecutivo**:
-    
-    - _Prompt_: "Ilustración profesional que muestra la automatización de procesos administrativos en una empresa industrial, con elementos tecnológicos y de eficiencia operacional."
-2. **Conclusiones**:
-    
-    - _Prompt_: "Ilustración profesional de un equipo de trabajo celebrando el éxito de un proyecto tecnológico en un entorno industrial."

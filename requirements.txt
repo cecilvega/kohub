@@ -10,3 +10,4 @@ setuptools
 firebase-admin
 pyyaml
 streamlit_authenticator
+streamlit-mermaid
