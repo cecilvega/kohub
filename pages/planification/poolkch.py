@@ -131,8 +131,6 @@ plot_df = comp_df.loc[(comp_df["pool_slot"].isin(pool_slots_filter))]
 ## Number of colors does not need to match the number of options
 colorize_multiselect_options(colors)
 
-# st.dataframe(plot_df)
-
 
 fig = plot_pool_px_timeline(plot_df, by_confirmed=confirmed_filter, range_x=d)
 st.plotly_chart(fig, use_container_width=True)

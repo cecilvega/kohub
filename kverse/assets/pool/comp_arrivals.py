@@ -159,6 +159,7 @@ def read_component_arrivals():
         ), "Some non-null values resulted in null arrival_date or arrival_type"
         frames.append(df)
 
+    # return frames
     df = pd.concat(frames)
 
     df = df.assign(

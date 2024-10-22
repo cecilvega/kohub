@@ -70,21 +70,21 @@ def create_base_chart(df, by_confirmed, range_x):
         # title="Proyección en función de cambios reales",
     )
 
-    st.write(
-        df[
-            [
-                "component_serial",
-                "vis_changeout_date",
-                "changeout_week",
-                "vis_arrival_date",
-                "arrival_week",
-                "days_in_repair",
-                "completion_rate",
-                "ovh_days",
-                "arrival_status",
-            ]
-        ]
-    )
+    # st.write(
+    #     df[
+    #         [
+    #             "component_serial",
+    #             "vis_changeout_date",
+    #             "changeout_week",
+    #             "vis_arrival_date",
+    #             "arrival_week",
+    #             "days_in_repair",
+    #             "completion_rate",
+    #             "ovh_days",
+    #             "arrival_status",
+    #         ]
+    #     ]
+    # )
 
     fig.update_traces(hovertemplate=hover_template)
 
