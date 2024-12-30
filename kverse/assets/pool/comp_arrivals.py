@@ -120,20 +120,20 @@ def format_datetime(value):
 
 def read_component_arrivals():
 
-    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
-
-    blob_client = blob_service_client.get_blob_client(
-        container="kdata-raw",
-        blob=f"PLANIFICACION/POOL/ESCONDIDA/Planilla de seguimiento de cumplimiento de entrega componentes 2024.xlsx",
-    )
-    blob_data = blob_client.download_blob()
-    blob_data = BytesIO(blob_data.readall())
-
+    # blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
+    #
+    # blob_client = blob_service_client.get_blob_client(
+    #     container="kdata-raw",
+    #     blob=f"PLANIFICACION/POOL/ESCONDIDA/Planilla de seguimiento de cumplimiento de entrega componentes 2024.xlsx",
+    # )
+    # blob_data = blob_client.download_blob()
+    # blob_data = BytesIO(blob_data.readall())
+    blob_data = "DATA/PLAN/Planilla de seguimiento de cumplimiento de entrega componentes 2024.xlsx"
     workbook = openpyxl.load_workbook(blob_data)
     frames = []
 
     for sheet in workbook.sheetnames:
-
+        # print(sheet)
         df = pd.read_excel(blob_data, sheet_name=sheet, skiprows=1, engine="openpyxl", dtype="str")
         # Apply the formatting function to every cell in the DataFrame
         df = df.applymap(format_datetime)
@@ -156,7 +156,7 @@ def read_component_arrivals():
         assert (
             df[df["value"].notna()]["arrival_date"].notna().all()
             and df[df["value"].notna()]["arrival_type"].notna().all()
-        ), "Some non-null values resulted in null arrival_date or arrival_type"
+        ), f"Some non-null values resulted in null arrival_date or arrival_type {df.loc[(df['value'].notna()) & (df['arrival_date'].isnull())]}"
         frames.append(df)
 
     # return frames
