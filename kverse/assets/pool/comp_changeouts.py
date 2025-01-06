@@ -30,16 +30,16 @@ def clean_string(s):
 
 def read_cc():
 
-    blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
-
-    blob_client = blob_service_client.get_blob_client(
-        container="kdata-raw",
-        blob=f"PLANIFICACION/POOL/ESCONDIDA/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL2.xlsx",
-    )
-    blob_data = blob_client.download_blob()
-    blob_data = BytesIO(blob_data.readall())
-
-    df = pd.read_excel(blob_data)
+    # blob_service_client = BlobServiceClient.from_connection_string(os.environ["AZURE_CONN_STR"])
+    #
+    # blob_client = blob_service_client.get_blob_client(
+    #     container="kdata-raw",
+    #     blob=f"PLANIFICACION/POOL/ESCONDIDA/PLANILLA DE CONTROL CAMBIO DE COMPONENTES MEL2.xlsx",
+    # )
+    # blob_data = blob_client.download_blob()
+    # blob_data = BytesIO(blob_data.readall())
+    blob_data = "DATA/PLAN/PLANILLA DE CONTROL CAMBIO DE COMPONENTES.xlsx"
+    df = pd.read_excel(blob_data, usecols="A:AG").dropna(subset=["FECHA DE CAMBIO"])
     columns_map = {
         "EQUIPO": "equipo",
         "COMPONENTE": "component",
@@ -81,5 +81,6 @@ def read_cc():
         .dt.year.astype(str)
         .str.cat(x["changeout_week"].astype(int).astype(str), sep="-W")
     )
+    df = df.loc[df["MODÉLO"].str.contains("960")].reset_index(drop=True)
 
     return df
