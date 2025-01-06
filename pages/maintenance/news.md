@@ -1,5 +1,11 @@
 # Implementación de una Herramienta Digital para Automatizar Procesos Administrativos en Operación y Mantención
 
+Can you help me visualizing this admin seletor? please ensure to write the whole code. I need you to edit this i made a change in the data structure. First of all, there is no supervisor, instead we have two hierarchy in personasPredefinidas, first categoria, which functionally remains the same, then instead of having a supervisor, a sub category must be shown (just like you have in supervisor). The funcionality remains quite the same, the naming changes. The new personas Predef dict is as follows: [ { "nombre": "Sebastian Cepeda", "cargo": "Asesor Técnico", "categoria": "N", "subcategoria": "N3", "habitacion": null, "cama": null, "id": "sebastian.cepeda" }, { "nombre": "Luis Ocacional", "cargo": "PSG", "categoria": "MN", "subcategoria": "OCACIONAL", "habitacion": null, "cama": null, "id": "luis.ocacional" }, { "nombre": "Victor Lucero", "cargo": "Asesor Técnico", "categoria": "M", "subcategoria": "OCACIONAL", "habitacion": null, "cama": null, "id": "victor.lucero" }, { "nombre": "Cecil Vega", "cargo": "Jefe Confiabilidad", "categoria": "MN", "subcategoria": null, "habitacion": null, "cama": null, "id": "cecil.vega" }, { "nombre": "Pablo Franulovich Robles", "cargo": "Supervisor", "categoria": "M", "subcategoria": "M1", "habitacion": 506, "cama": "ventana", "id": "pablo.franulovich" }, { "nombre": "Marco Birkner Vargas", "cargo": "Técnico", "categoria": "M", "subcategoria": "M1", "habitacion": 550, "cama": "ventana", "id": "marco.birkner" }, { "nombre": "Peter Ruiz Guarachi", "cargo": "Supervisor", "categoria": "N", "subcategoria": "N1", "habitacion": 507, "cama": "ventana", "id": "peter.ruiz" }, { "nombre": "Fernando Rey Cerda", "cargo": "Técnico", "categoria": "N", "subcategoria": "N1", "habitacion": 550, "cama": "pasillo", "id": "fernando.rey" } ]
+
+REMOVE the header, and REMOVE the footer and REMOVE the sidetab.
+KEEP categorias and cargo, the overall UI should feel exactly the same.
+
+
 ## Índice
 
 - [Resumen Ejecutivo](#resumen-ejecutivo)
@@ -135,55 +141,78 @@ Desarrollar e implementar una **herramienta digital integral** en dos etapas:
 
 ### Cronograma del Proyecto
 
-mermaid
-
-Copiar código
 
 ```mermaid
 gantt
-    dateFormat  YYYY-MM-DD
-    title       Cronograma del Proyecto
+  dateFormat  YYYY-MM-DD
+  title       Cronograma del Proyecto
 
-    section Fase 1
-    Hito 1       :done,    h1, 2024-10-01,2024-10-07
-    Hito 2       :done,    h2, 2024-10-08,2024-10-21
-    Hito 3       :done,    h3, 2024-10-22,2024-10-28
-
-    section Fase 2
-    Hito 4       :active,  h4, 2024-11-01,2024-11-14
-    Hito 5       :         h5, 2024-11-15,2024-11-21
-    Hito 6       :         h6, 2024-11-22,2024-11-28
-
-    section Fase 3 Desarrollo e Implementación de la Segunda Etapa
-    Hito 7  holasdasdasdsaddasa      :         h7, 2024-12-01,2024-12-14
-    Hito 8       :         h8, 2024-12-15,2024-12-21
-    Hito 9       :         h9, 2024-12-22,2024-12-28
-
-    section Fase 4 Cierre del Proyecto y Transferencia
-    Hito 10      :         h10, 2024-12-29,2024-12-31
+  section Fase 1: Inicio del Proyecto y Desarrollo del MVP
+  Hito 1: Kickoff del Proyecto           :done,    h1, 2024-10-01,2024-10-22
+  Hito 2: Entrega de MVP para Gestión de Asistencia :active,    h2, 2024-10-23,2024-10-31
+  
+  section Fase 2: Transformación de Data en Formato MEL
+  Hito 3: Desarrollo de Planillas Útiles           :         h3, 2024-11-01,2024-11-14
+  Hito 4: Validación y Ajustes del Formato MEL     :         h4, 2024-11-15,2024-11-21
+  
+  section Fase 3: Implementación del Módulo de Registro de Tareas
+  Hito 5: Desarrollo del Módulo de Registro de Tareas       :         h5, 2024-12-01,2024-12-14
+  Hito 6: Pruebas y Validación del Módulo                   :         h6, 2024-12-15,2024-12-21
+  Hito 7: Entrega Final del Proyecto y Transferencia        :         h7, 2024-12-22,2024-12-31
 
 ```
 
 ### Detalles de los Hitos
 
-#### Hito 1: Inicio del Proyecto y Formación del Equipo
+#### Hito 1: Kickoff del Proyecto
 
-- **Fecha**: Primera semana de octubre.
+- **Fecha**: 1 al 22 de octubre.
 - **Entregables**:
-    - Documento de conformación del equipo con roles y responsabilidades.
-    - Plan de proyecto y cronograma general.
-    - Agenda de reuniones y plan de comunicación.
+    - Reuniones de inicio con todos los stakeholders.
+    - Cronograma y plan de ejecución del proyecto.
+    - Diagnóstico del problema inicial. Mas de una perdida de falta productivo.
 
-#### Hito 2: Levantamiento de Requerimientos y Análisis de Procesos
+#### Hito 2: Entrega de MVP para Gestión de Asistencia
 
-- **Fecha**: Segunda y tercera semana de octubre.
+- **Fecha**: 23 al 31 de octubre.
 - **Entregables**:
-    - Documento detallado de requerimientos funcionales y técnicos.
-    - Mapeo de procesos actuales y propuesta de mejora.
-    - Especificaciones para el desarrollo de la herramienta.
+    - Versión inicial funcional de la herramienta que permita la gestión de asistencia.
+    - Módulo de administrador para configuración básica y control de acceso.
+    - Registro de asistencia operativa con funcionalidades básicas.
 
-_... (continúa con los demás hitos como en el documento anterior)_
+#### Hito 3: Desarrollo de Planillas Útiles en Formato MEL
 
+- **Fecha**: 1 al 14 de noviembre.
+- **Entregables**:
+    - Herramienta de transformación de datos en planillas en formato MEL.
+    - Generación de reportes estándares necesarios para la gestión operativa.
+
+#### Hito 4: Validación y Ajustes del Formato MEL
+
+- **Fecha**: 15 al 21 de noviembre.
+- **Entregables**:
+    - Ajustes y validaciones en base a retroalimentación.
+    - Confirmación de alineación con requisitos.
+
+#### Hito 5: Desarrollo del Módulo de Registro de Tareas
+
+- **Fecha**: 1 al 14 de diciembre.
+- **Entregables**:
+    - Módulo adicional para el registro directo de tareas por el personal técnico.
+
+#### Hito 6: Pruebas y Validación del Módulo de Registro de Tareas
+
+- **Fecha**: 15 al 21 de diciembre.
+- **Entregables**:
+    - Pruebas de funcionalidad y estabilidad.
+
+#### Hito 7: Entrega Final del Proyecto y Transferencia
+
+- **Fecha**: 22 al 31 de diciembre.
+- **Entregables**:
+    - Implementación final del sistema completo.
+    - Capacitación y documentación para el equipo.
+    - Plan de soporte post-implementación.
 ---
 
 ## Beneficios Cuantitativos
@@ -221,8 +250,6 @@ graph TD
 
 
 ## Conclusiones
-
-_Prompt para DALL·E: "Ilustración profesional de un equipo de trabajo celebrando el éxito de un proyecto tecnológico en un entorno industrial."_
 
 - **Mejora en Eficiencia Operativa**: Automatización de procesos clave.
 - **Reducción de Carga Administrativa**: Liberando tiempo para actividades estratégicas.
